@@ -4,7 +4,6 @@ import pathlib
 
 # Libraries
 from piel import develop  # NOQA: F401
-from piel import flows  # NOQA: F401
 from piel import materials  # NOQA: F401
 from piel import models  # NOQA: F401
 from piel import visual  # NOQA: F401
@@ -17,6 +16,8 @@ from .parametric import *
 from .project_structure import *
 from .tools import *
 from .utils import *
+
+from piel import flows  # NOQA: F401 # Do not move from here.
 
 os.environ["PIEL_PACKAGE_DIRECTORY"] = str(
     pathlib.Path(__file__).parent.parent.resolve()
