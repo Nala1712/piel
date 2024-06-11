@@ -2,32 +2,87 @@
 
 # The goal of this notebook is to demonstrate some of the codesign functionality in a photonics-first electronically-specified system.
 
-# ## 1. Setting up our electro-optic photonic system
+# ## 1a. Configuring our `piel` Project
+
+# You can install `piel` directly via `pip`, or use the provided `poetry` lockfile-controlled environment directly from `git`.
 #
-# Let's first extract the digital logic we want to implement from a basic chained electro-optic switch fabric.
+
+# All the imports we will need throughout this flows.
 
 # +
 # We begin by importing a parametric circuit from `gdsfactory`:
+import jax.numpy as jnp
+import hdl21 as h
 import gdsfactory as gf
+import numpy as np
+import pandas as pd
+import piel
+import sax
+import sys
+
 from piel.models.physical.photonic import (
     mzi2x2_2x2_phase_shifter,
     component_lattice_generic,
 )
-import numpy as np
-import jax.numpy as jnp
-import piel
-import sax
 
-from gdsfactory.generic_tech import get_generic_pdk
-
-PDK = get_generic_pdk()
-PDK.activate()
-
+from piel.integration.amaranth_openlane import (
+    layout_amaranth_truth_table_through_openlane,
+)
 
 # -
 
+# First, let's set up the filesystem in the directory in which all our files will be generated and stored. This is really an extension of a full mixed-signal design compatible with the tools supported by `piel`.
+
+current_example_directory = piel.return_path(".")
+piel.create_empty_piel_project(
+    project_name="full_flow_demo", parent_directory=current_example_directory
+)
+
+# Check out the contents in this file system:
+
+# ! ls full_flow_demo
+
+# ```bash
+# docs  full_flow_demo  setup.py
+# ```
+
+# ! ls full_flow_demo/full_flow_demo
+
+# ```bash
+# analogue    __init__.py  models    runs     sdc  tb
+# components  io		 photonic  scripts  src
+# ```
+
+# Let's install our empty project, before we start generating files now:
+
+# !pip install -e full_flow_demo
+
+# ```bash
+# Obtaining file:///home/daquintero/phd/piel_private/docs/examples/10_demo_full_flow/full_flow_demo
+#   Preparing metadata (setup.py) ... done
+# Installing collected packages: full_flow_demo
+#   Running setup.py develop for full_flow_demo
+# Successfully installed full_flow_demo-0.0.1
+#
+# [notice] A new release of pip is available: 23.0.1 -> 24.0
+# [notice] To update, run: pip install --upgrade pip
+# ```
+
+# Verfiy this package is installed:
+
+import full_flow_demo
+
+
+# ## 1b. Setting up our electro-optic photonic system
+#
+# The next step is to set up the problem we want to demonstrate. In this example, we will demonstrate the co-design for an electro-optic swtich fabric. We will extract the optical logic we want to implement in the fabric and then use that to determine the parameters and design flow of the microelectronics flow.
+
 
 def create_switch_fabric():
+    from gdsfactory.generic_tech import get_generic_pdk
+
+    PDK = get_generic_pdk()
+    PDK.activate()
     # CURRENT TODO: Create a basic chain fabric and verify the logic is implemented properly with binary inputs.
 
     chain_3_mode_lattice = [
@@ -49,77 +104,47 @@ create_switch_fabric()
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
 
 # +
-from piel.tools.amaranth import (
-    construct_amaranth_module_from_truth_table,
-    generate_verilog_from_amaranth,
-    verify_truth_table,
-)
+# TODO convert this into a single generic function.
+# Inputs truth table, input port list, output port list, module
+# No outputs
 
 detector_phase_truth_table = {
     "detector_in": ["00", "01", "10", "11"],
     "phase_map_out": ["00", "10", "11", "11"],
 }
 
+# Define all the relevant ports from the dictionary
 input_ports_list = ["detector_in"]
 output_ports_list = ["phase_map_out"]
-our_truth_table_module = construct_amaranth_module_from_truth_table(
+
+piel.flows.generate_verilog_and_verification_from_truth_table(
     truth_table=detector_phase_truth_table,
-    inputs=input_ports_list,
-    outputs=output_ports_list,
-)
-
-ports_list = input_ports_list + output_ports_list
-generate_verilog_from_amaranth(
-    amaranth_module=our_truth_table_module,
-    ports_list=ports_list,
-    target_file_name="our_truth_table_module.v",
-    target_directory=".",
-)
-
-design_directory = piel.return_path(amaranth_driven_flow)
-
-amaranth_driven_flow_src_folder = piel.get_module_folder_type_location(
-    module=amaranth_driven_flow, folder_type="digital_source"
-)
-
-ports_list = input_ports_list + output_ports_list
-generate_verilog_from_amaranth(
-    amaranth_module=our_truth_table_module,
-    ports_list=ports_list,
-    target_file_name="our_truth_table_module.v",
-    target_directory=amaranth_driven_flow_src_folder,
-)
-
-verify_truth_table(
-    truth_table_amaranth_module=our_truth_table_module,
-    truth_table_dictionary=detector_phase_truth_table,
-    inputs=input_ports_list,
-    outputs=output_ports_list,
-    vcd_file_name="our_truth_table_module.vcd",
-    target_directory=".",
+    input_ports=input_ports_list,
+    output_ports=output_ports_list,
+    module=full_flow_demo,
 )
 # -
 
 # ## 3a. Modelling our implementing digital-to-optical logic
 
 # +
-design_directory = piel.return_path(simple_design)
+design_directory = piel.return_path(full_flow_demo)
 source_output_files_directory = (
     piel.get_module_folder_type_location(
-        module=simple_design, folder_type="digital_source"
+        module=full_flow_demo, folder_type="digital_source"
     )
     / "out"
 )
 simulation_output_files_directory = (
     piel.get_module_folder_type_location(
-        module=simple_design, folder_type="digital_testbench"
+        module=full_flow_demo, folder_type="digital_testbench"
     )
     / "out"
 )
 
 
 piel.configure_cocotb_simulation(
-    design_directory=simple_design,
+    design_directory=full_flow_demo,
     simulator="icarus",
     top_level_language="verilog",
     top_level_verilog_module="adder",
@@ -228,11 +253,6 @@ simple_ideal_o3_mzi_2x2_plots.savefig(
 
 # ## 3b. Digital Chip Implementation
 
-# +
-from piel.integration.amaranth_openlane import (
-    layout_amaranth_truth_table_through_openlane,
-)
-
 layout_amaranth_truth_table_through_openlane(
     amaranth_module=our_truth_table_module,
     inputs_name_list=input_ports_list,
@@ -240,7 +260,6 @@ layout_amaranth_truth_table_through_openlane(
     parent_directory=amaranth_driven_flow,
     openlane_version="v1",
 )
-# -
 
 # ## 4a. Driver-Amplfier Modelling
 
@@ -251,16 +270,6 @@ layout_amaranth_truth_table_through_openlane(
 # ## 4b. Composing and Equivalent-Circuit Modelling
 
 # +
-from piel.models.physical.photonic import (
-    mzi2x2_2x2_phase_shifter,
-    straight_heater_metal_simple,
-)
-import hdl21 as h
-import pandas as pd
-import numpy as np
-import piel
-import sax
-import sys
 from gdsfactory.generic_tech import get_generic_pdk
 
 our_resistive_heater_netlist = straight_heater_metal_simple().get_netlist(
