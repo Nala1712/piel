@@ -9,7 +9,7 @@ from ..tools.amaranth import (
 )
 from ..types import PathTypes
 from ..tools.cocotb import (
-    CocoTBSimulator,
+    Simulator,
     configure_cocotb_simulation,
     run_cocotb_simulation,
     read_simulation_data,
@@ -101,7 +101,7 @@ def run_verification_simulation_for_design(
     module: PathTypes,
     top_level_verilog_module: str,
     test_python_module: str,
-    simulator: CocoTBSimulator = "icarus",
+    simulator: Simulator = "icarus",
 ):
     """
     Configures and runs a Cocotb simulation for a given design module and retrieves the simulation data.
@@ -115,7 +115,7 @@ def run_verification_simulation_for_design(
                                         Example: "full_flow_demo_module"
     - test_python_module (str): The name of the Python test module for the design.
                                 Example: "test_full_flow_demo"
-    - simulator (CocoTBSimulator): The simulator to use for the Cocotb simulation. Default is "icarus".
+    - simulator (Simulator): The simulator to use for the Cocotb simulation. Default is "icarus".
 
     Returns:
     - example_simulation_data: The simulation data read from the output files.

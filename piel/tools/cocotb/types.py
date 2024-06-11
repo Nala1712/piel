@@ -1,4 +1,4 @@
 from typing import Literal
 
-CocoTBSimulator = Literal["icarus", "verilator"]
-CocoTBTopLevelLanguage = Literal["verilog", "vhdl"]
+Simulator = Literal["icarus", "verilator"]
+TopLevelLanguage = Literal["verilog", "vhdl"]

@@ -59,7 +59,7 @@ async def truth_table_test(dut):
         script_content += f"    # Test case {i + 1}\n"
         for signal in signals[:-1]:  # All but the last signal are inputs
             value = truth_table[signal][i]
-            script_content += f"    dut.{signal}.value = bytes(\"{value}\", 'utf-8')\n"  # Assign binary string values directly
+            script_content += f'    dut.{signal}.value = cocotb.binary.BinaryValue("{value}")\n'  # Assign binary string values directly
 
         script_content += "    await Timer(2, units='ns')\n\n"
 
@@ -69,8 +69,8 @@ async def truth_table_test(dut):
         output_signal = signals[-1]
 
         # Add assertion and logging
-        script_content += f"    assert dut.{output_signal}.value == bytes(\"{expected_output}\", 'utf-8'), "
-        script_content += f'f"Test failed for inputs {signals[:-1]}: expected {expected_output} but got {{dut.{output_signal}.value}}"\n'
+        script_content += f'    assert dut.{output_signal}.value == cocotb.binary.BinaryValue("{expected_output}"), '  # CURRENT TODO FIX THIS
+        script_content += f'f"Test failed for inputs {signals[:-1]}: expected {expected_output} but got {{dut.{output_signal}.value}}."\n'
 
         for signal in signals:
             script_content += f"    {signal.lower()}_data.append(dut.{signal}.value)\n"

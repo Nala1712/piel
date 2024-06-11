@@ -15,45 +15,45 @@ async def truth_table_test(dut):
     time_data = []
 
     # Test case 1
-    dut.detector_in.value = bytes("00", "utf-8")
+    dut.detector_in.value = cocotb.binary.BinaryValue("00")
     await Timer(2, units="ns")
 
-    assert dut.phase_map_out.value == bytes(
-        "00", "utf-8"
-    ), f"Test failed for inputs ['detector_in']: expected 00 but got {dut.phase_map_out.value}"
+    assert dut.phase_map_out.value == cocotb.binary.BinaryValue(
+        "00"
+    ), f"Test failed for inputs ['detector_in']: expected 00 but got {dut.phase_map_out.value}."
     detector_in_data.append(dut.detector_in.value)
     phase_map_out_data.append(dut.phase_map_out.value)
     time_data.append(get_sim_time())
 
     # Test case 2
-    dut.detector_in.value = bytes("01", "utf-8")
+    dut.detector_in.value = cocotb.binary.BinaryValue("01")
     await Timer(2, units="ns")
 
-    assert dut.phase_map_out.value == bytes(
-        "10", "utf-8"
-    ), f"Test failed for inputs ['detector_in']: expected 10 but got {dut.phase_map_out.value}"
+    assert dut.phase_map_out.value == cocotb.binary.BinaryValue(
+        "10"
+    ), f"Test failed for inputs ['detector_in']: expected 10 but got {dut.phase_map_out.value}."
     detector_in_data.append(dut.detector_in.value)
     phase_map_out_data.append(dut.phase_map_out.value)
     time_data.append(get_sim_time())
 
     # Test case 3
-    dut.detector_in.value = bytes("10", "utf-8")
+    dut.detector_in.value = cocotb.binary.BinaryValue("10")
     await Timer(2, units="ns")
 
-    assert dut.phase_map_out.value == bytes(
-        "11", "utf-8"
-    ), f"Test failed for inputs ['detector_in']: expected 11 but got {dut.phase_map_out.value}"
+    assert dut.phase_map_out.value == cocotb.binary.BinaryValue(
+        "11"
+    ), f"Test failed for inputs ['detector_in']: expected 11 but got {dut.phase_map_out.value}."
     detector_in_data.append(dut.detector_in.value)
     phase_map_out_data.append(dut.phase_map_out.value)
     time_data.append(get_sim_time())
 
     # Test case 4
-    dut.detector_in.value = bytes("11", "utf-8")
+    dut.detector_in.value = cocotb.binary.BinaryValue("11")
     await Timer(2, units="ns")
 
-    assert dut.phase_map_out.value == bytes(
-        "11", "utf-8"
-    ), f"Test failed for inputs ['detector_in']: expected 11 but got {dut.phase_map_out.value}"
+    assert dut.phase_map_out.value == cocotb.binary.BinaryValue(
+        "11"
+    ), f"Test failed for inputs ['detector_in']: expected 11 but got {dut.phase_map_out.value}."
     detector_in_data.append(dut.detector_in.value)
     phase_map_out_data.append(dut.phase_map_out.value)
     time_data.append(get_sim_time())

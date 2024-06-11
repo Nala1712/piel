@@ -123,6 +123,8 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
     output_ports=output_ports_list,
     module=full_flow_demo,
 )
+
+
 # -
 
 # ! ls full_flow_demo/full_flow_demo/src
@@ -139,13 +141,45 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 
 # ## 3a. Modelling our implementing digital-to-optical logic
 
-if piel.check_cocotb_testbench_exists(full_flow_demo) == False:
-    # We need to create a cocotb testbench file. We can use an automatic one for truth tables.
-    piel.integration.create_cocotb_truth_table_verification_python_script(
-        module=full_flow_demo,
-        truth_table=detector_phase_truth_table,
-        test_python_module_name="test_top",
-    )
+
+# +
+def convert_to_binary_form(truth_table):
+    """
+    Converts the binary strings in the truth table dictionary to their byte representations.
+
+    Args:
+        truth_table (dict): A dictionary with keys as signal names and values as lists of binary strings.
+
+    Returns:
+        dict: A dictionary with the same structure but with binary strings converted to bytes.
+    """
+    binary_truth_table = {}
+
+    for key, values in truth_table.items():
+        # Convert each binary string in the list to bytes
+        binary_truth_table[key] = [
+            int(value, 2).to_bytes((len(value) + 7) // 8, byteorder="big")
+            for value in values
+        ]
+
+    return binary_truth_table
+
+
+# Example usage:
+detector_phase_truth_table = {
+    "detector_in": ["00", "01", "10", "11"],
+    "phase_map_out": ["00", "10", "11", "11"],
+}
+
+binary_form = convert_to_binary_form(detector_phase_truth_table)
+print(binary_form)
+# -
+
+piel.integration.create_cocotb_truth_table_verification_python_script(
+    module=full_flow_demo,
+    truth_table=detector_phase_truth_table,
+    test_python_module_name="test_top",
+)
 
 piel.flows.run_verification_simulation_for_design(
     module=full_flow_demo,

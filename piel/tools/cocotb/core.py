@@ -14,7 +14,7 @@ import functools
 import pathlib
 import subprocess
 from piel.file_system import return_path, write_file, delete_path_list_in_directory
-from .types import CocoTBSimulator, CocoTBTopLevelLanguage
+from .types import Simulator, TopLevelLanguage
 
 __all__ = [
     "check_cocotb_testbench_exists",
@@ -57,8 +57,8 @@ def check_cocotb_testbench_exists(
 
 def configure_cocotb_simulation(
     design_directory: str | pathlib.Path,
-    simulator: CocoTBSimulator,
-    top_level_language: CocoTBTopLevelLanguage,
+    simulator: Simulator,
+    top_level_language: TopLevelLanguage,
     top_level_verilog_module: str,
     test_python_module: str,
     design_sources_list: list | None = None,
@@ -179,5 +179,27 @@ def run_cocotb_simulation(
         file_text=script,
         file_name="run_cocotb_simulation.sh",
     )
-    run = subprocess.run(script, capture_output=True, shell=True, check=True)
+    try:
+        # Run the script and capture the output
+        run = subprocess.run(script, capture_output=True, shell=True, check=True)
+
+        # Print the standard output and standard error
+        print("Standard Output (stdout):")
+        print(run.stdout.decode())  # Decode bytes to string
+        print("Standard Error (stderr):")
+        print(run.stderr.decode())  # Decode bytes to string
+
+        # Return the completed process object
+        return run
+
+    except subprocess.CalledProcessError as e:
+        # Print detailed error information
+        print(f"Command '{e.cmd}' returned non-zero exit status {e.returncode}.")
+        print("Standard Output (stdout):")
+        print(e.stdout.decode())  # Decode bytes to string
+        print("Standard Error (stderr):")
+        print(e.stderr.decode())  # Decode bytes to string
+
+        # Re-raise the exception if needed or handle it as per your requirement
+        raise
     return run
