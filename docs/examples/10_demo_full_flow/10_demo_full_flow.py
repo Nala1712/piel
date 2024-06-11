@@ -125,130 +125,154 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 )
 # -
 
+# ! ls full_flow_demo/full_flow_demo/src
+
+# ```
+# truth_table_module.v
+# ```
+
+# ! ls full_flow_demo/full_flow_demo/tb
+
+# ```
+# __init__.py  out  truth_table_module.vcd
+# ```
+
 # ## 3a. Modelling our implementing digital-to-optical logic
 
-# +
-design_directory = piel.return_path(full_flow_demo)
-source_output_files_directory = (
-    piel.get_module_folder_type_location(
-        module=full_flow_demo, folder_type="digital_source"
+if piel.check_cocotb_testbench_exists(full_flow_demo) == False:
+    # We need to create a cocotb testbench file. We can use an automatic one for truth tables.
+    piel.integration.create_cocotb_truth_table_verification_python_script(
+        module=full_flow_demo,
+        truth_table=detector_phase_truth_table,
+        test_python_module_name="test_top",
     )
-    / "out"
-)
-simulation_output_files_directory = (
-    piel.get_module_folder_type_location(
-        module=full_flow_demo, folder_type="digital_testbench"
-    )
-    / "out"
-)
 
-
-piel.configure_cocotb_simulation(
-    design_directory=full_flow_demo,
+piel.flows.run_verification_simulation_for_design(
+    module=full_flow_demo,
+    top_level_verilog_module="top",
+    test_python_module="test_top",
     simulator="icarus",
-    top_level_language="verilog",
-    top_level_verilog_module="adder",
-    test_python_module="test_adder",
-    design_sources_list=list((design_directory / "src").iterdir()),
 )
 
-# Run cocotb simulation
-piel.run_cocotb_simulation(design_directory)
+# +
 
-cocotb_simulation_output_files = piel.get_simulation_output_files_from_design(
-    simple_design
-)
-cocotb_simulation_output_files
+# design_directory = piel.return_path(full_flow_demo)
+# source_output_files_directory = (
+#     piel.get_module_folder_type_location(
+#         module=full_flow_demo, folder_type="digital_source"
+#     )
+#     / "out"
+# )
+# simulation_output_files_directory = (
+#     piel.get_module_folder_type_location(
+#         module=full_flow_demo, folder_type="digital_testbench"
+#     )
+#     / "out"
+# )
 
-example_simple_simulation_data = piel.read_simulation_data(
-    cocotb_simulation_output_files[0]
-)
-example_simple_simulation_data
 
-piel.simple_plot_simulation_data(example_simple_simulation_data)
-# TODO fix this properly.
+# piel.configure_cocotb_simulation(
+#     design_directory=full_flow_demo,
+#     simulator="icarus",
+#     top_level_language="verilog",
+#     top_level_verilog_module="adder",
+#     test_python_module="test_adder",
+#     design_sources_list=list((design_directory / "src").iterdir()),
+# )
 
-cocotb_simulation_output_files = piel.get_simulation_output_files_from_design(
-    simple_design
-)
-example_simple_simulation_data = piel.read_simulation_data(
-    cocotb_simulation_output_files[0]
-)
-example_simple_simulation_data
+# # Run cocotb simulation
+# piel.run_cocotb_simulation(design_directory)
 
-basic_ideal_phase_array = (
-    piel.models.logic.electro_optic.return_phase_array_from_data_series(
-        data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
-    )
-)
+# cocotb_simulation_output_files = piel.get_simulation_output_files_from_design(
+#     simple_design
+# )
+# cocotb_simulation_output_files
 
-example_simple_simulation_data["phase"] = basic_ideal_phase_array
-example_simple_simulation_data
+# example_simple_simulation_data = piel.read_simulation_data(
+#     cocotb_simulation_output_files[0]
+# )
+# example_simple_simulation_data
 
-our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
-    {"straight_heater_metal_undercut": straight_heater_metal_simple}
-)
-our_custom_library
+# # first function up to here
 
-mzi2x2_model, mzi2x2_model_info = sax.circuit(
-    netlist=mzi2x2_2x2_phase_shifter_netlist, models=our_custom_library
-)
-piel.sax_to_s_parameters_standard_matrix(mzi2x2_model(), input_ports_order=("o2", "o1"))
+# piel.simple_plot_simulation_data(example_simple_simulation_data)
+# # TODO fix this properly.
 
-mzi2x2_active_unitary_array = list()
-for phase_i in example_simple_simulation_data.phase:
-    mzi2x2_active_unitary_i = piel.sax_to_s_parameters_standard_matrix(
-        mzi2x2_model(sxt={"active_phase_rad": phase_i}),
-        input_ports_order=(
-            "o2",
-            "o1",
-        ),
-    )
-    mzi2x2_active_unitary_array.append(mzi2x2_active_unitary_i)
+# basic_ideal_phase_array = (
+#     piel.models.logic.electro_optic.return_phase_array_from_data_series(
+#         data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
+#     )
+# )
 
-optical_port_input = np.array([1, 0])
-optical_port_input
+# example_simple_simulation_data["phase"] = basic_ideal_phase_array
+# example_simple_simulation_data
 
-example_optical_power_output = np.dot(
-    mzi2x2_simple_simulation_data.unitary.iloc[0][0], optical_port_input
-)
-example_optical_power_output
+# # first function up to here.
 
-output_amplitude_array_0 = np.array([])
-output_amplitude_array_1 = np.array([])
-for unitary_i in mzi2x2_simple_simulation_data.unitary:
-    output_amplitude_i = np.dot(unitary_i[0], optical_port_input)
-    output_amplitude_array_0 = np.append(
-        output_amplitude_array_0, output_amplitude_i[0]
-    )
-    output_amplitude_array_1 = np.append(
-        output_amplitude_array_1, output_amplitude_i[1]
-    )
-output_amplitude_array_0
+# our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
+#     {"straight_heater_metal_undercut": straight_heater_metal_simple}
+# )
+# our_custom_library
 
-mzi2x2_simple_simulation_data["output_amplitude_array_0"] = output_amplitude_array_0
-mzi2x2_simple_simulation_data["output_amplitude_array_1"] = output_amplitude_array_1
-mzi2x2_simple_simulation_data
+# mzi2x2_model, mzi2x2_model_info = sax.circuit(
+#     netlist=mzi2x2_2x2_phase_shifter_netlist, models=our_custom_library
+# )
+# piel.sax_to_s_parameters_standard_matrix(mzi2x2_model(), input_ports_order=("o2", "o1"))
 
-mzi2x2_simple_simulation_data_lines = piel.visual.points_to_lines_fixed_transient(
-    data=mzi2x2_simple_simulation_data,
-    time_index_name="t",
-    fixed_transient_time=1,
-)
+# mzi2x2_active_unitary_array = list()
+# for phase_i in example_simple_simulation_data.phase:
+#     mzi2x2_active_unitary_i = piel.sax_to_s_parameters_standard_matrix(
+#         mzi2x2_model(sxt={"active_phase_rad": phase_i}),
+#         input_ports_order=(
+#             "o2",
+#             "o1",
+#         ),
+#     )
+#     mzi2x2_active_unitary_array.append(mzi2x2_active_unitary_i)
 
-simple_ideal_o3_mzi_2x2_plots = piel.visual.plot_simple_multi_row(
-    data=mzi2x2_simple_simulation_data_lines,
-    x_axis_column_name="t",
-    row_list=[
-        "phase",
-        "output_amplitude_array_0_abs",
-        "output_amplitude_array_0_phase_deg",
-    ],
-    y_axis_title_list=["e1 Phase", "o3 Amplitude", "o3 Phase"],
-)
-simple_ideal_o3_mzi_2x2_plots.savefig(
-    "../_static/img/examples/03a_sax_active_cosimulation/simple_ideal_o3_mzi_2x2_plots.PNG"
-)
+# optical_port_input = np.array([1, 0])
+# optical_port_input
+
+# example_optical_power_output = np.dot(
+#     mzi2x2_simple_simulation_data.unitary.iloc[0][0], optical_port_input
+# )
+# example_optical_power_output
+
+# output_amplitude_array_0 = np.array([])
+# output_amplitude_array_1 = np.array([])
+# for unitary_i in mzi2x2_simple_simulation_data.unitary:
+#     output_amplitude_i = np.dot(unitary_i[0], optical_port_input)
+#     output_amplitude_array_0 = np.append(
+#         output_amplitude_array_0, output_amplitude_i[0]
+#     )
+#     output_amplitude_array_1 = np.append(
+#         output_amplitude_array_1, output_amplitude_i[1]
+#     )
+# output_amplitude_array_0
+
+# mzi2x2_simple_simulation_data["output_amplitude_array_0"] = output_amplitude_array_0
+# mzi2x2_simple_simulation_data["output_amplitude_array_1"] = output_amplitude_array_1
+# mzi2x2_simple_simulation_data
+
+# mzi2x2_simple_simulation_data_lines = piel.visual.points_to_lines_fixed_transient(
+#     data=mzi2x2_simple_simulation_data,
+#     time_index_name="t",
+#     fixed_transient_time=1,
+# )
+
+# simple_ideal_o3_mzi_2x2_plots = piel.visual.plot_simple_multi_row(
+#     data=mzi2x2_simple_simulation_data_lines,
+#     x_axis_column_name="t",
+#     row_list=[
+#         "phase",
+#         "output_amplitude_array_0_abs",
+#         "output_amplitude_array_0_phase_deg",
+#     ],
+#     y_axis_title_list=["e1 Phase", "o3 Amplitude", "o3 Phase"],
+# )
+# simple_ideal_o3_mzi_2x2_plots.savefig(
+#     "../_static/img/examples/03a_sax_active_cosimulation/simple_ideal_o3_mzi_2x2_plots.PNG"
+# )
 # -
 
 # ## 3b. Digital Chip Implementation
@@ -321,4 +345,6 @@ transient_simulation_results = pd.read_csv("TransientTb.csv")
 transient_simulation_results.iloc[20:40]
 # -
 
-# ## 5. What comes next?
+# ## 5a. Putting it all together
+
+# ## 5b. What comes next?

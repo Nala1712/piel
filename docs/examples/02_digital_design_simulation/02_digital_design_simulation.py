@@ -200,7 +200,7 @@ piel.configure_cocotb_simulation(
 # TOPLEVEL := adder
 # MODULE := test_adder
 # include $(shell cocotb-config --makefiles)/Makefile.sim
-# PosixPath('/home/daquintero/phd/piel_private/docs/examples/designs/simple_design/simple_design/tb/Makefile')
+# PosixPath('/home/daquintero/phd/piel/docs/examples/designs/simple_design/simple_design/tb/Makefile')
 # ```
 
 # Now we can create the simulation output files from the `makefile`. Note this will only work in our configured Linux environment.

@@ -8,13 +8,20 @@ from ..tools.amaranth import (
     LogicSignals,
 )
 from ..types import PathTypes
+from ..tools.cocotb import (
+    CocoTBSimulator,
+    configure_cocotb_simulation,
+    run_cocotb_simulation,
+    read_simulation_data,
+    get_simulation_output_files_from_design,
+)
 
 
 def generate_verilog_and_verification_from_truth_table(
-    truth_table: TruthTable,
     input_ports: LogicSignals,
-    output_ports: LogicSignals,
     module: PathTypes,
+    output_ports: LogicSignals,
+    truth_table: TruthTable,
     target_file_name: str = "truth_table_module",
 ):
     """
@@ -88,3 +95,52 @@ def generate_verilog_and_verification_from_truth_table(
         vcd_file_name=f"{target_file_name}.vcd",
         target_directory=module,
     )
+
+
+def run_verification_simulation_for_design(
+    module: PathTypes,
+    top_level_verilog_module: str,
+    test_python_module: str,
+    simulator: CocoTBSimulator = "icarus",
+):
+    """
+    Configures and runs a Cocotb simulation for a given design module and retrieves the simulation data.
+    TODO possibly in the future swap the methodology of running the simulation here.
+
+    Parameters:
+    - module (str): The name or path of the module within the design hierarchy where the generated files
+                    will be placed. This is used to determine the file structure and directory paths.
+                    Example: "full_flow_demo"
+    - top_level_verilog_module (str): The name of the top-level Verilog module in the design.
+                                        Example: "full_flow_demo_module"
+    - test_python_module (str): The name of the Python test module for the design.
+                                Example: "test_full_flow_demo"
+    - simulator (CocoTBSimulator): The simulator to use for the Cocotb simulation. Default is "icarus".
+
+    Returns:
+    - example_simulation_data: The simulation data read from the output files.
+    """
+
+    # Determine the design directory and output directories
+    design_directory = return_path(module)
+
+    # Configure the Cocotb simulation
+    configure_cocotb_simulation(
+        design_directory=module,
+        simulator=simulator,
+        top_level_language="verilog",
+        top_level_verilog_module=top_level_verilog_module,
+        test_python_module=test_python_module,
+        design_sources_list=list((design_directory / "src").iterdir()),
+    )
+
+    # Run the Cocotb simulation
+    run_cocotb_simulation(design_directory)
+
+    # Retrieve the simulation output files
+    cocotb_simulation_output_files = get_simulation_output_files_from_design(module)
+
+    # Read the simulation data from the first output file
+    simulation_data = read_simulation_data(cocotb_simulation_output_files[0])
+
+    return simulation_data
