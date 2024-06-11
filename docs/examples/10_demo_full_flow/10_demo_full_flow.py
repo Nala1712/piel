@@ -58,7 +58,7 @@ piel.create_empty_piel_project(
 # !pip install -e full_flow_demo
 
 # ```bash
-# Obtaining file:///home/daquintero/phd/piel_private/docs/examples/10_demo_full_flow/full_flow_demo
+# Obtaining file:///home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo
 #   Preparing metadata (setup.py) ... done
 # Installing collected packages: full_flow_demo
 #   Running setup.py develop for full_flow_demo
@@ -142,38 +142,7 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 # ## 3a. Modelling our implementing digital-to-optical logic
 
 
-# +
-def convert_to_binary_form(truth_table):
-    """
-    Converts the binary strings in the truth table dictionary to their byte representations.
-
-    Args:
-        truth_table (dict): A dictionary with keys as signal names and values as lists of binary strings.
-
-    Returns:
-        dict: A dictionary with the same structure but with binary strings converted to bytes.
-    """
-    binary_truth_table = {}
-
-    for key, values in truth_table.items():
-        # Convert each binary string in the list to bytes
-        binary_truth_table[key] = [
-            int(value, 2).to_bytes((len(value) + 7) // 8, byteorder="big")
-            for value in values
-        ]
-
-    return binary_truth_table
-
-
-# Example usage:
-detector_phase_truth_table = {
-    "detector_in": ["00", "01", "10", "11"],
-    "phase_map_out": ["00", "10", "11", "11"],
-}
-
-binary_form = convert_to_binary_form(detector_phase_truth_table)
-print(binary_form)
-# -
+# Because we are using a truth table, we can automatically configure the `cocotb` testing script:
 
 piel.integration.create_cocotb_truth_table_verification_python_script(
     module=full_flow_demo,
@@ -181,12 +150,62 @@ piel.integration.create_cocotb_truth_table_verification_python_script(
     test_python_module_name="test_top",
 )
 
-piel.flows.run_verification_simulation_for_design(
+# Now we can run the simulation:
+
+cocotb_simulation_data = piel.flows.run_verification_simulation_for_design(
     module=full_flow_demo,
     top_level_verilog_module="top",
     test_python_module="test_top",
     simulator="icarus",
 )
+cocotb_simulation_data\
+
+# ```
+# # #!/bin/bash 
+# # Makefile 
+# SIM ?= icarus 
+# TOPLEVEL_LANG ?= verilog 
+# VERILOG_SOURCES += /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v 
+# TOPLEVEL := top 
+# MODULE := test_top 
+# include $(shell cocotb-config --makefiles)/Makefile.sim
+# Standard Output (stdout):
+# # rm -f results.xml
+# make -f Makefile results.xml
+# make[1]: Entering directory '/home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/tb'
+# /usr/bin/iverilog -o sim_build/sim.vvp -D COCOTB_SIM=1 -s top  -f sim_build/cmds.f -g2012   /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v 
+# # rm -f results.xml
+# MODULE=test_top  TESTCASE= TOPLEVEL=top  TOPLEVEL_LANG=verilog  \
+#          /usr/bin/vvp -M /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/lib/python3.10/site-packages/cocotb/libs -m libcocotbvpi_icarus   sim_build/sim.vvp 
+#      -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:105  in set_program_name_in_venv        Using Python virtual environment interpreter at /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/bin/python
+#      -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:101  in gpi_print_registered_impl       VPI registered
+#      0.00ns INFO     cocotb                             Running on Icarus Verilog version 11.0 (stable)
+#      0.00ns INFO     cocotb                             Running tests with cocotb v1.8.1 from /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/lib/python3.10/site-packages/cocotb
+#      0.00ns INFO     cocotb                             Seeding Python random module with 1718127153
+#      0.00ns INFO     cocotb.regression                  Found test test_top.truth_table_test
+#      0.00ns INFO     cocotb.regression                  running truth_table_test (1/1)
+#                                                           Test for logic defined by the truth table
+#      8.00ns INFO     cocotb.regression                  truth_table_test passed
+#      8.00ns INFO     cocotb.regression                  **************************************************************************************
+#                                                         ** TEST                          STATUS  SIM TIME (ns)  REAL TIME (s)  RATIO (ns/s) **
+#                                                         **************************************************************************************
+#                                                         ** test_top.truth_table_test      PASS           8.00           0.00       2638.05  **
+#                                                         **************************************************************************************
+#                                                         ** TESTS=1 PASS=1 FAIL=0 SKIP=0                  8.00           0.45         17.76  **
+#                                                         **************************************************************************************
+#                                                         
+# make[1]: Leaving directory '/home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/tb'
+#
+# Standard Error (stderr):
+#
+#
+# |    |   Unnamed: 0 |   detector_in |   phase_map_out |   time |
+# |---:|-------------:|--------------:|----------------:|-------:|
+# |  0 |            0 |             0 |               0 |   2000 |
+# |  1 |            1 |             1 |              10 |   4000 |
+# |  2 |            2 |            10 |              11 |   6000 |
+# |  3 |            3 |            11 |              11 |   8000 |
+# ```
 
 # +
 
