@@ -1,11 +1,11 @@
 import jax.numpy as jnp  # TODO add typing
 import gdsfactory as gf
 import sax
-from typing import Callable
 from ..types import (
     absolute_to_threshold,
     convert_array_type,
     ArrayTypes,
+    CircuitComponent,
     FockStatePhaseTransitionType,
     NumericalTypes,
     OpticalTransmissionCircuit,
@@ -142,10 +142,11 @@ def generate_s_parameter_circuit_from_photonic_circuit(
 
 
 def get_state_phase_transitions(
-    switch_function: OpticalTransmissionCircuit,
+    circuit_component: CircuitComponent,
+    circuit_transmission_function: OpticalTransmissionCircuit,
     mode_amount: int,
-    switch_states: list[NumericalTypes] | None = None,
     input_fock_states: list[ArrayTypes] | None = None,
+    switch_states: list[NumericalTypes] | None = None,
     **kwargs,
 ) -> list[ArrayTypes]:
     """
@@ -174,6 +175,8 @@ def get_state_phase_transitions(
     the numerical phase that is applied. This may be the case, for example, in asymmetric Mach-Zehnder modulators models, etc.
 
     As such, this function will help us extract the corresponding phase for a particular switch transition.
+
+    When the switch function is larger than a single switch, it is necessary to extract the location of the corresponding switches as function parameters.
     """
     # We compose the switch_states we want to apply
     if switch_states is None:
@@ -193,7 +196,7 @@ def get_state_phase_transitions(
         # Get the transmission matrix for the switch state
         circuit_i = sax_to_s_parameters_standard_matrix(
             # TODO maybe generalise the switch address state mapping into a corresponding function
-            switch_function(sxt={"active_phase_rad": switch_state_i}),
+            circuit_transmission_function(sxt={"active_phase_rad": switch_state_i}),
             **kwargs,
         )
 
@@ -247,13 +250,13 @@ def get_state_to_phase_map(
     As such, this function will help us extract the corresponding phase for a particular switch transition.
     """
     state_phase_transition_list = get_state_phase_transitions(
-        switch_function=switch_function,
-        switch_states=switch_states,
-        input_fock_states=input_fock_states,
+        circuit_transmission_function=switch_function,
         mode_amount=mode_amount,
+        input_fock_states=input_fock_states,
+        switch_states=switch_states,
         **kwargs,
     )
-    # TODO implement the extraction from mapping the target fock states to the corresponing phase in more generic way
+    # TODO implement the extraction from mapping the target fock states to the corresponding phase in more generic way
     cross_phase = extract_phase_from_fock_state_transition_list(
         state_phase_transition_list, transition_type="cross"
     )

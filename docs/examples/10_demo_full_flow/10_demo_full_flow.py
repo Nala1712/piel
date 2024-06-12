@@ -1,6 +1,8 @@
 # # `piel` Electronic-Photonic Co-Design - Full Flow Demo
 
 # The goal of this notebook is to demonstrate some of the codesign functionality in a photonics-first electronically-specified system.
+#
+# TODO make a nice diagram of the system we're modelling here.
 
 # ## 1a. Configuring our `piel` Project
 
@@ -68,14 +70,14 @@ piel.create_empty_piel_project(
 # [notice] To update, run: pip install --upgrade pip
 # ```
 
-# Verfiy this package is installed:
+# Verify this package is installed:
 
 import full_flow_demo
 
 
 # ## 1b. Setting up our electro-optic photonic system
 #
-# The next step is to set up the problem we want to demonstrate. In this example, we will demonstrate the co-design for an electro-optic swtich fabric. We will extract the optical logic we want to implement in the fabric and then use that to determine the parameters and design flow of the microelectronics flow.
+# The next step is to set up the problem we want to demonstrate. In this example, we will demonstrate the co-design for an electro-optic switch fabric. We will extract the optical logic we want to implement in the fabric and then use that to determine the parameters and design flow of the microelectronics flow.
 
 
 def create_switch_fabric():
@@ -93,6 +95,7 @@ def create_switch_fabric():
     chain_3_mode_lattice_circuit = component_lattice_generic(
         network=chain_3_mode_lattice,
     )
+
     return chain_3_mode_lattice_circuit
 
 
@@ -122,10 +125,15 @@ optical_logic_verification_models["straight_heater_metal_undercut_length200"] = 
 
 # Now, we need to compute our transmission information accordingly for a given set of optical inputs:
 
-piel.flows.get_state_phase_transitions(
+chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
     switch_function=discrete_lattice_transmission_circuit,
     mode_amount=3,
 )
+pd.DataFrame(chain_fock_state_transmission_list)
+# CURRENT TODO Fix this so that it actually maps the phase accordingly.
+
+# Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
+
 
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation

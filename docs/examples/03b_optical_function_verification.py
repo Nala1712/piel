@@ -149,10 +149,10 @@ raw_output_state_0 = jnp.dot(zero_phase_circuit[0], valid_input_fock_states[0])
 output_state_0 = {
     "phase": (switch_states[0],),
     "input_fock_state": piel.convert_array_type(
-        valid_input_fock_states[0], piel.tuple_int_type
+        valid_input_fock_states[0], piel.types.TupleIntType
     ),
     "output_fock_state": piel.absolute_to_threshold(
-        raw_output_state_0, output_array_type=piel.tuple_int_type
+        raw_output_state_0, output_array_type=piel.types.TupleIntType
     ),
 }
 output_state_0
@@ -164,7 +164,7 @@ output_state_0
 # You can also compose these type of data in a format that `piel` standardizes in order to implement the functional verification with a nicer helper function:
 
 raw_output_state_1 = jnp.dot(zero_phase_circuit[0], valid_input_fock_states[1])
-output_state_1 = piel.models.logic.electro_optic.format_electro_optic_fock_transition(
+output_state_1 = piel.flows.electro_optic.format_electro_optic_fock_transition(
     switch_state_array=(0,),
     input_fock_state_array=valid_input_fock_states[1],
     raw_output_state=raw_output_state_1,
@@ -178,7 +178,7 @@ output_state_1
 # ### Optical Function with $\pi$-phase Applied
 
 raw_output_state_2 = jnp.dot(pi_phase_circuit[0], valid_input_fock_states[0])
-output_state_2 = piel.models.logic.electro_optic.format_electro_optic_fock_transition(
+output_state_2 = piel.flows.electro_optic.format_electro_optic_fock_transition(
     switch_state_array=(jnp.pi,),
     input_fock_state_array=valid_input_fock_states[0],
     raw_output_state=raw_output_state_2,
@@ -192,7 +192,7 @@ output_state_2
 # ```
 
 raw_output_state_3 = jnp.dot(pi_phase_circuit[0], valid_input_fock_states[1])
-output_state_3 = piel.models.logic.electro_optic.format_electro_optic_fock_transition(
+output_state_3 = piel.flows.electro_optic.format_electro_optic_fock_transition(
     switch_state_array=(jnp.pi,),
     input_fock_state_array=valid_input_fock_states[1],
     raw_output_state=raw_output_state_3,
@@ -268,8 +268,8 @@ target_verification_dataframe.equals(computed_verification_dataframe)
 #
 # TODO: One thing I have noticed is that depending on the random configuration of the runner, sometimes the cross and bar states invert on which phase they map. I need to see how to fix that within the computation, if it is even possible.
 
-output_transition_mzi_2x2 = piel.models.logic.electro_optic.get_state_phase_transitions(
-    switch_function=ideal_mzi_2x2_2x2_phase_shifter_circuit,
+output_transition_mzi_2x2 = piel.flows.electro_optic.get_state_phase_transitions(
+    circuit_transmission_function=ideal_mzi_2x2_2x2_phase_shifter_circuit,
     switch_states=[0, jnp.pi],
     mode_amount=2,
     input_ports_order=("o2", "o1"),
@@ -291,12 +291,12 @@ output_transition_mzi_2x2
 
 # +
 print("Current Numerical Implementation")
-cross_phase = piel.models.logic.electro_optic.extract_phase(
+cross_phase = piel.flows.electro_optic.extract_phase_from_fock_state_transition_list(
     output_transition_mzi_2x2, transition_type="cross"
 )
 print("Cross phase:", cross_phase)
 
-bar_phase = piel.models.logic.electro_optic.extract_phase(
+bar_phase = piel.flows.electro_optic.extract_phase_from_fock_state_transition_list(
     output_transition_mzi_2x2, transition_type="bar"
 )
 print("Bar phase:", bar_phase)
@@ -325,12 +325,12 @@ target_output_transition_mzi_2x2 = [
 ]
 
 print("Target Numerical Implementation")
-cross_phase = piel.models.logic.electro_optic.extract_phase(
+cross_phase = piel.flows.electro_optic.extract_phase_from_fock_state_transition_list(
     target_output_transition_mzi_2x2, transition_type="cross"
 )
 print("Cross phase:", cross_phase)
 
-bar_phase = piel.models.logic.electro_optic.extract_phase(
+bar_phase = piel.flows.electro_optic.extract_phase_from_fock_state_transition_list(
     target_output_transition_mzi_2x2, transition_type="bar"
 )
 print("Bar phase:", bar_phase)
@@ -593,9 +593,9 @@ chain_mode_3, chain_mode_3_switch_position_list
 # We can try a little analytical simulator accordingly. Each "switch" state gets replaced by a 2x2 transmission matrix for each specific state, and concatenated to build the corresponding state of the system.
 
 piel.flows.electro_optic.get_state_phase_transitions(
-    switch_function=chain_3_mode_lattice_circuit_s_parameters,
-    switch_states=[0, np.pi],
+    circuit_transmission_function=chain_3_mode_lattice_circuit_s_parameters,
     mode_amount=3,
+    switch_states=[0, np.pi],
 )
 
 # ```python

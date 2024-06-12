@@ -19,7 +19,11 @@ from .models.electrical import (
 )
 from .models.electro_optic import FockStatePhaseTransitionType, PhaseMapType
 from .models.electronic import BitFormatType, HVAMetricsType, LNAMetricsType
-from .models.photonic import OpticalTransmissionCircuit
+from .models.photonic import (
+    CircuitComponent,
+    OpticalTransmissionCircuit,
+    RecursiveNetlist,
+)
 
 # Always last
 from .type_conversion import (
