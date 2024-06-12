@@ -96,9 +96,32 @@ def create_switch_fabric():
     return chain_3_mode_lattice_circuit
 
 
-create_switch_fabric()
+chain_3_mode_lattice_circuit = create_switch_fabric()
+chain_3_mode_lattice_circuit
 
 # ## 2. Extracting our optical-to-electronic control logic truth table
+
+
+# We know that we have three optical modes to compute the inputs, and we always are inputting a discrete (on-off) optical pulse on any input. Let's assume our design target is to implement some electronic logic that tries to route the input light down the chain to the very bottom.
+#
+# Let's implement basic optical switch models "1/0" states:
+
+optical_logic_verification_models = piel.models.frequency.get_default_models(
+    type="optical_logic_verification"
+)
+# A specific custom addition to our application:
+optical_logic_verification_models["straight_heater_metal_undercut_length200"] = optical_logic_verification_models["straight_heater_metal_undercut"]
+
+(
+    discrete_lattice_transmission_circuit,
+    discrete_lattice_transmission_circuit_info,
+) = piel.flows.generate_s_parameter_circuit_from_photonic_circuit(
+    circuit=chain_3_mode_lattice_circuit,
+    models=optical_logic_verification_models
+)
+
+# Now, we need to compute our transmission information accordingly for a given set of optical inputs:
+
 
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation

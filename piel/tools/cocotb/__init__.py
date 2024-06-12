@@ -10,4 +10,3 @@ from .data import (
     read_simulation_data,
     simple_plot_simulation_data,
 )
-from .types import Simulator, TopLevelLanguage

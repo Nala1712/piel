@@ -592,7 +592,7 @@ chain_mode_3, chain_mode_3_switch_position_list
 
 # We can try a little analytical simulator accordingly. Each "switch" state gets replaced by a 2x2 transmission matrix for each specific state, and concatenated to build the corresponding state of the system.
 
-piel.models.logic.electro_optic.get_state_phase_transitions(
+piel.flows.electro_optic.get_state_phase_transitions(
     switch_function=chain_3_mode_lattice_circuit_s_parameters,
     switch_states=[0, np.pi],
     mode_amount=3,
