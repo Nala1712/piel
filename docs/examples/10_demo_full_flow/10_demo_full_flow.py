@@ -158,25 +158,25 @@ cocotb_simulation_data = piel.flows.run_verification_simulation_for_design(
     test_python_module="test_top",
     simulator="icarus",
 )
-cocotb_simulation_data\
+cocotb_simulation_data
 
-# ```
-# # #!/bin/bash 
-# # Makefile 
-# SIM ?= icarus 
-# TOPLEVEL_LANG ?= verilog 
-# VERILOG_SOURCES += /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v 
-# TOPLEVEL := top 
-# MODULE := test_top 
+# ```bash
+# # #!/bin/bash
+# # Makefile
+# SIM ?= icarus
+# TOPLEVEL_LANG ?= verilog
+# VERILOG_SOURCES += /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v
+# TOPLEVEL := top
+# MODULE := test_top
 # include $(shell cocotb-config --makefiles)/Makefile.sim
 # Standard Output (stdout):
 # # rm -f results.xml
 # make -f Makefile results.xml
 # make[1]: Entering directory '/home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/tb'
-# /usr/bin/iverilog -o sim_build/sim.vvp -D COCOTB_SIM=1 -s top  -f sim_build/cmds.f -g2012   /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v 
+# /usr/bin/iverilog -o sim_build/sim.vvp -D COCOTB_SIM=1 -s top  -f sim_build/cmds.f -g2012   /home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/src/truth_table_module.v
 # # rm -f results.xml
 # MODULE=test_top  TESTCASE= TOPLEVEL=top  TOPLEVEL_LANG=verilog  \
-#          /usr/bin/vvp -M /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/lib/python3.10/site-packages/cocotb/libs -m libcocotbvpi_icarus   sim_build/sim.vvp 
+#          /usr/bin/vvp -M /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/lib/python3.10/site-packages/cocotb/libs -m libcocotbvpi_icarus   sim_build/sim.vvp
 #      -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:105  in set_program_name_in_venv        Using Python virtual environment interpreter at /home/daquintero/.pyenv/versions/3.10.13/envs/piel_0_1_0/bin/python
 #      -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:101  in gpi_print_registered_impl       VPI registered
 #      0.00ns INFO     cocotb                             Running on Icarus Verilog version 11.0 (stable)
@@ -193,11 +193,11 @@ cocotb_simulation_data\
 #                                                         **************************************************************************************
 #                                                         ** TESTS=1 PASS=1 FAIL=0 SKIP=0                  8.00           0.45         17.76  **
 #                                                         **************************************************************************************
-#                                                         
+#
 # make[1]: Leaving directory '/home/daquintero/phd/piel/docs/examples/10_demo_full_flow/full_flow_demo/full_flow_demo/tb'
 #
 # Standard Error (stderr):
-#
+# ```
 #
 # |    |   Unnamed: 0 |   detector_in |   phase_map_out |   time |
 # |---:|-------------:|--------------:|----------------:|-------:|
@@ -205,51 +205,99 @@ cocotb_simulation_data\
 # |  1 |            1 |             1 |              10 |   4000 |
 # |  2 |            2 |            10 |              11 |   6000 |
 # |  3 |            3 |            11 |              11 |   8000 |
-# ```
 
 # +
+# Current work in progress move this out of here.
+import pandas as pd
+import sax
+from typing import Callable
 
-# design_directory = piel.return_path(full_flow_demo)
-# source_output_files_directory = (
-#     piel.get_module_folder_type_location(
-#         module=full_flow_demo, folder_type="digital_source"
-#     )
-#     / "out"
-# )
-# simulation_output_files_directory = (
-#     piel.get_module_folder_type_location(
-#         module=full_flow_demo, folder_type="digital_testbench"
-#     )
-#     / "out"
-# )
+def compute_simulation_unitaries(
+    simulation_data: pd.DataFrame,
+    phase_mapping_function: Callable,
+    data_series_key: str,
+    netlist: dict,
+    model_library: dict,
+    input_ports_order: tuple | None = None
+) -> List[Any]:
+    """
+    Processes simulation data to generate a list of unitaries using a digital-to-phase model and a custom library.
+
+    Args:
+        simulation_data (pd.DataFrame): DataFrame containing simulation data.
+        phase_mapping_function (Callable): Function to map data series to phase array.
+        data_series_key (str): Key to access the specific data series in the simulation data.
+        phase_map (Dict[str, Any]): Additional parameters for phase mapping if required by the function.
+        netlist (Dict[str, Any]): Netlist describing the circuit.
+        custom_model_function (Callable): Function to create a custom model library.
+        library_defaults (Dict[str, Any]): Default parameters for the custom model library.
+        s_parameters_function (Callable): Function to convert model output to S-parameters matrix.
+        input_ports_order (Tuple[str, str]): Order of input ports for the S-parameters function.
+
+    Returns:
+        List[Any]: List of unitaries corresponding to the phase array.
+    """
+    # Generate phase array using the provided phase mapping function
+    data_series = simulation_data[data_series_key]
+    phase_array = phase_mapping_function(data_series=data_series, phase_map=phase_map)
+    simulation_data['phase'] = phase_array
+
+    # Create the circuit model using the netlist and custom library
+    circuit_model, _ = sax.circuit(netlist=netlist, models=custom_library)
+
+    # Generate unitaries for each phase in the phase array
+    unitaries = []
+    for phase in phase_array:
+        # Compute the unitary for the current phase
+        unitary = s_parameters_function(circuit_model(sxt={"active_phase_rad": phase}))
+        unitaries.append(unitary)
+
+    return unitaries
+
+def compute_simulation_unitaries():
+    # Inputs
+    # digital-to-phase model
+    # simulation data file
+    # sax-circuit-model library
+    # output returns list of unitaries accordingly
+
+    # basic_ideal_phase_array = (
+    #     piel.models.logic.electro_optic.return_phase_array_from_data_series(
+    #         data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
+    #     )
+    # )
+
+    # example_simple_simulation_data["phase"] = basic_ideal_phase_array
+    # example_simple_simulation_data
+
+    # our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
+    #     {"straight_heater_metal_undercut": straight_heater_metal_simple}
+    # )
+    # our_custom_library
+
+    # mzi2x2_model, mzi2x2_model_info = sax.circuit(
+    #     netlist=mzi2x2_2x2_phase_shifter_netlist, models=our_custom_library
+    # )
+    # piel.sax_to_s_parameters_standard_matrix(mzi2x2_model(), input_ports_order=("o2", "o1"))
+
+    # mzi2x2_active_unitary_array = list()
+    # for phase_i in example_simple_simulation_data.phase:
+    #     mzi2x2_active_unitary_i = piel.sax_to_s_parameters_standard_matrix(
+    #         mzi2x2_model(sxt={"active_phase_rad": phase_i}),
+    #         input_ports_order=(
+    #             "o2",
+    #             "o1",
+    #         ),
+    #     )
+#     mzi2x2_active_unitary_array.append(mzi2x2_active_unitary_i)
 
 
-# piel.configure_cocotb_simulation(
-#     design_directory=full_flow_demo,
-#     simulator="icarus",
-#     top_level_language="verilog",
-#     top_level_verilog_module="adder",
-#     test_python_module="test_adder",
-#     design_sources_list=list((design_directory / "src").iterdir()),
-# )
-
-# # Run cocotb simulation
-# piel.run_cocotb_simulation(design_directory)
-
-# cocotb_simulation_output_files = piel.get_simulation_output_files_from_design(
-#     simple_design
-# )
-# cocotb_simulation_output_files
-
-# example_simple_simulation_data = piel.read_simulation_data(
-#     cocotb_simulation_output_files[0]
-# )
-# example_simple_simulation_data
-
-# # first function up to here
-
-# piel.simple_plot_simulation_data(example_simple_simulation_data)
-# # TODO fix this properly.
+# +
+# Inputs
+# digital-to-phase model
+# simulation data file
+# sax-circuit-model library
+# output returns list of unitaries accordingly
 
 # basic_ideal_phase_array = (
 #     piel.models.logic.electro_optic.return_phase_array_from_data_series(
@@ -259,8 +307,6 @@ cocotb_simulation_data\
 
 # example_simple_simulation_data["phase"] = basic_ideal_phase_array
 # example_simple_simulation_data
-
-# # first function up to here.
 
 # our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
 #     {"straight_heater_metal_undercut": straight_heater_metal_simple}
@@ -282,6 +328,10 @@ cocotb_simulation_data\
 #         ),
 #     )
 #     mzi2x2_active_unitary_array.append(mzi2x2_active_unitary_i)
+
+# second function up to here
+
+# third function starts here.
 
 # optical_port_input = np.array([1, 0])
 # optical_port_input
