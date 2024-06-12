@@ -1,3 +1,11 @@
+import pandas as pd
+from ..core import TupleIntType
+
+FockStatePhaseTransitionType = {
+    "phase": TupleIntType,
+    "input_fock_state": TupleIntType,
+    "output_fock_state": TupleIntType,
+}
 """
 This is the standard format of a corresponding output state for a given input state in the electro-optic model:
 
@@ -7,8 +15,5 @@ output_state_0 = {
     "output_fock_state": piel.absolute_to_threshold(raw_output_state_0, output_array_type="tuple"),
 }
 """
-FockStatePhaseTransitionType = {
-    "phase": tuple[float, ...],
-    "input_fock_state": tuple[int, ...],
-    "output_fock_state": tuple[int, ...],
-}
+
+PhaseMapType = pd.DataFrame | pd.Series | dict

@@ -1,5 +1,12 @@
 # Top Level Types Declaration, all should be imported here.
-from .core import PathTypes, PielBaseModel, NumericalTypes, ArrayTypes, QuantityType
+from .core import (
+    PathTypes,
+    PielBaseModel,
+    NumericalTypes,
+    ArrayTypes,
+    QuantityType,
+    TupleIntType,
+)
 from .tools.amaranth import AmaranthTruthTable, AmaranthLogicSignals
 from .tools.cocotb import CocoTBSimulator, CocoTBTopLevelLanguage
 from .models.electrical import (
@@ -10,8 +17,8 @@ from .models.electrical import (
     DCCableHeatTransferType,
     DCCableMaterialSpecificationType,
 )
-from .models.electro_optic import FockStatePhaseTransitionType
-from .models.electronic import LNAMetricsType, HVAMetricsType
+from .models.electro_optic import FockStatePhaseTransitionType, PhaseMapType
+from .models.electronic import BitFormatType, HVAMetricsType, LNAMetricsType
 
 # Always last
 from .type_conversion import (

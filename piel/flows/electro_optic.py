@@ -2,7 +2,14 @@ import jax.numpy as jnp  # TODO add typing
 import gdsfactory as gf
 import sax
 from typing import Callable
-from ..types import ArrayTypes, NumericalTypes, FockStatePhaseTransitionType
+from ..types import (
+    absolute_to_threshold,
+    convert_array_type,
+    ArrayTypes,
+    NumericalTypes,
+    FockStatePhaseTransitionType,
+    TupleIntType,
+)
 from ..tools.qutip import fock_states_only_individual_modes
 from ..tools.sax import sax_to_s_parameters_standard_matrix
 from ..models.frequency.defaults import get_default_models
@@ -59,9 +66,9 @@ def format_electro_optic_fock_transition(
     """
     electro_optic_state = {
         "phase": convert_array_type(switch_state_array, "tuple"),
-        "input_fock_state": convert_array_type(input_fock_state_array, tuple_int_type),
+        "input_fock_state": convert_array_type(input_fock_state_array, TupleIntType),
         "output_fock_state": absolute_to_threshold(
-            raw_output_state, output_array_type=tuple_int_type
+            raw_output_state, output_array_type=TupleIntType
         ),
     }
     # assert type(electro_optic_state) == FockStatePhaseTransitionType # TODO fix this
