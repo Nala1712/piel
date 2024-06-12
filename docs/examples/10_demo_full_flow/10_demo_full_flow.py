@@ -122,6 +122,10 @@ optical_logic_verification_models["straight_heater_metal_undercut_length200"] = 
 
 # Now, we need to compute our transmission information accordingly for a given set of optical inputs:
 
+piel.flows.get_state_phase_transitions(
+    switch_function=discrete_lattice_transmission_circuit,
+    mode_amount=3,
+)
 
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
@@ -159,7 +163,9 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 # ! ls full_flow_demo/full_flow_demo/tb
 
 # ```
-# __init__.py  out  truth_table_module.vcd
+# __init__.py  __pycache__	       sim_build
+# Makefile     results.xml	       test_top.py
+# out	     run_cocotb_simulation.sh  truth_table_module.vcd
 # ```
 
 # ## 3a. Modelling our implementing digital-to-optical logic

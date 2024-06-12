@@ -6,8 +6,9 @@ from ..types import (
     absolute_to_threshold,
     convert_array_type,
     ArrayTypes,
-    NumericalTypes,
     FockStatePhaseTransitionType,
+    NumericalTypes,
+    OpticalTransmissionCircuit,
     TupleIntType,
 )
 from ..tools.qutip import fock_states_only_individual_modes
@@ -15,7 +16,7 @@ from ..tools.sax import sax_to_s_parameters_standard_matrix
 from ..models.frequency.defaults import get_default_models
 
 
-def extract_phase(
+def extract_phase_from_fock_state_transition_list(
     phase_transition_list: list[FockStatePhaseTransitionType], transition_type="cross"
 ):
     """
@@ -141,10 +142,10 @@ def generate_s_parameter_circuit_from_photonic_circuit(
 
 
 def get_state_phase_transitions(
-    switch_function: Callable,
+    switch_function: OpticalTransmissionCircuit,
+    mode_amount: int,
     switch_states: list[NumericalTypes] | None = None,
     input_fock_states: list[ArrayTypes] | None = None,
-    mode_amount: int | None = None,
     **kwargs,
 ) -> list[ArrayTypes]:
     """
@@ -211,7 +212,7 @@ def get_state_phase_transitions(
 
 
 def get_state_to_phase_map(
-    switch_function: Callable,
+    switch_function: OpticalTransmissionCircuit,
     switch_states: list[NumericalTypes] | None = None,
     input_fock_states: list[ArrayTypes] | None = None,
     target_transition_list: list[dict] | None = None,
@@ -253,6 +254,10 @@ def get_state_to_phase_map(
         **kwargs,
     )
     # TODO implement the extraction from mapping the target fock states to the corresponing phase in more generic way
-    cross_phase = extract_phase(state_phase_transition_list, transition_type="cross")
-    bar_phase = extract_phase(state_phase_transition_list, transition_type="bar")
+    cross_phase = extract_phase_from_fock_state_transition_list(
+        state_phase_transition_list, transition_type="cross"
+    )
+    bar_phase = extract_phase_from_fock_state_transition_list(
+        state_phase_transition_list, transition_type="bar"
+    )
     return bar_phase, cross_phase
