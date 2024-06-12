@@ -3,7 +3,7 @@ import math
 import numpy as np
 import jax.numpy as jnp
 from typing import Optional, Literal
-from piel.integration.type_conversion import convert_array_type
+from piel.types.type_conversion import convert_array_type
 import qutip
 
 __all__ = [

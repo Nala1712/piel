@@ -9,12 +9,14 @@ import pydantic
 import types
 import numpy as np
 import jax.numpy as jnp
-from typing import Optional
+from typing import Optional, Literal
 
 
 PathTypes = str | pathlib.Path | os.PathLike | types.ModuleType
 ArrayTypes = np.ndarray | jnp.ndarray
+TupleIntType = tuple[int, ...]
 NumericalTypes = int | float | np.dtype | jnp.dtype
+PackageArrayType = Literal["qutip", "jax", "numpy", "list", "tuple"] | TupleIntType
 
 
 class PielBaseModel(pydantic.BaseModel):

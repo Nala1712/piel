@@ -1,28 +1,13 @@
 """
 This file provides a set of utilities in converting between common data types to represent information between different toolsets.
 """
-import jax
 import jax.numpy as jnp
 import numpy as np
-from typing import Literal
 import qutip
-
-__all__ = [
-    "array_types",
-    "tuple_int_type",
-    "package_array_types",
-    "convert_2d_array_to_string",
-    "convert_array_type",
-    "absolute_to_threshold",
-]
-
-# TODO consolidate all types into one file
-array_types = np.ndarray | jnp.ndarray
-tuple_int_type = tuple[int, ...]
-package_array_types = Literal["qutip", "jax", "numpy", "list", "tuple"] | tuple_int_type
+from .core import ArrayTypes, PackageArrayType, TupleIntType
 
 
-def convert_array_type(array: array_types, output_type: package_array_types):
+def convert_array_type(array: ArrayTypes, output_type: PackageArrayType):
     if output_type == "qutip":
         if type(array) is qutip.Qobj:
             pass
@@ -48,7 +33,7 @@ def convert_array_type(array: array_types, output_type: package_array_types):
             pass
         else:
             array = tuple(array.tolist())
-    elif output_type == tuple_int_type:
+    elif output_type == TupleIntType:
         if isinstance(array, jnp.ndarray):
             array = tuple(array.tolist())
 
@@ -87,20 +72,20 @@ def convert_2d_array_to_string(list_2D: list[list]):
 
 
 def absolute_to_threshold(
-    array: array_types,
+    array: ArrayTypes,
     threshold: float = 1e-6,
     dtype_output: int | float | bool = int,
-    output_array_type: package_array_types = "jax",
-) -> package_array_types:
+    output_array_type: PackageArrayType = "jax",
+) -> PackageArrayType:
     """
     This function converts the computed optical transmission arrays to single bit digital signals.
     The function takes the absolute value of the array and compares it to a threshold to determine the digital signal.
 
     Args:
-        array (array_types): The optical transmission array of any dimension.
+        array (ArrayTypes): The optical transmission array of any dimension.
         dtype_output (int | float | bool, optional): The output type. Defaults to int.
         threshold (float, optional): The threshold to compare the array to. Defaults to 1e-6.
-        output_array_type (array_types, optional): The output type. Defaults to "jax".
+        output_array_type (ArrayTypes, optional): The output type. Defaults to "jax".
 
     Returns:
     """
