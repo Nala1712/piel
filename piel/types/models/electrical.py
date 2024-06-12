@@ -1,6 +1,6 @@
 from typing import Optional, Union
-from ....materials.thermal_conductivity.types import MaterialReferenceType
-from ....types import QuantityType
+from piel.materials.thermal_conductivity.types import MaterialReferenceType
+from piel.types import QuantityType
 
 __all__ = [
     "CoaxialCableGeometryType",

@@ -22,11 +22,16 @@ import numpy as np
 import jax.numpy as jnp  # TODO add typing
 import pandas as pd
 from typing import Callable, Optional, Iterable, Literal
-from ....integration.type_conversion import array_types, convert_array_type, absolute_to_threshold, tuple_int_type
+from ....integration.type_conversion import (
+    array_types,
+    convert_array_type,
+    absolute_to_threshold,
+    tuple_int_type,
+)
 from ....tools.sax.utils import sax_to_s_parameters_standard_matrix
 from ....tools.qutip.fock import fock_states_only_individual_modes
 from ....types import ArrayTypes, NumericalTypes
-from .types import FockStatePhaseTransitionType
+from piel.types.models.electro_optic import FockStatePhaseTransitionType
 
 __all__ = [
     "bits_array_from_bits_amount",
@@ -115,8 +120,9 @@ def convert_phase_array_to_bit_array(
     return tuple(bit_array)
 
 
-def extract_phase(phase_transition_list: list[FockStatePhaseTransitionType],
-                  transition_type='cross'):
+def extract_phase(
+    phase_transition_list: list[FockStatePhaseTransitionType], transition_type="cross"
+):
     """
     Extracts the phase corresponding to the specified transition type.
 
@@ -127,10 +133,7 @@ def extract_phase(phase_transition_list: list[FockStatePhaseTransitionType],
     Returns:
         float: Phase corresponding to the specified transition type.
     """
-    transition_mapping = {
-        'cross': ((1, 0), (0, 1)),
-        'bar': ((1, 0), (1, 0))
-    }
+    transition_mapping = {"cross": ((1, 0), (0, 1)), "bar": ((1, 0), (1, 0))}
 
     if transition_type not in transition_mapping:
         raise ValueError("Invalid transition type. Use 'cross' or 'bar'.")
@@ -138,8 +141,11 @@ def extract_phase(phase_transition_list: list[FockStatePhaseTransitionType],
     input_state, output_state = transition_mapping[transition_type]
 
     for entry in phase_transition_list:
-        if entry['input_fock_state'] == input_state and entry['output_fock_state'] == output_state:
-            return entry['phase'][0]
+        if (
+            entry["input_fock_state"] == input_state
+            and entry["output_fock_state"] == output_state
+        ):
+            return entry["phase"][0]
 
     raise ValueError(f"Phase for the {transition_type} transition not found.")
 
@@ -206,7 +212,9 @@ def format_electro_optic_fock_transition(
     electro_optic_state = {
         "phase": convert_array_type(switch_state_array, "tuple"),
         "input_fock_state": convert_array_type(input_fock_state_array, tuple_int_type),
-        "output_fock_state": absolute_to_threshold(raw_output_state, output_array_type=tuple_int_type),
+        "output_fock_state": absolute_to_threshold(
+            raw_output_state, output_array_type=tuple_int_type
+        ),
     }
     # assert type(electro_optic_state) == FockStatePhaseTransitionType # TODO fix this
     return electro_optic_state
@@ -217,7 +225,7 @@ def get_state_phase_transitions(
     switch_states: list[NumericalTypes] | None = None,
     input_fock_states: list[ArrayTypes] | None = None,
     mode_amount: int | None = None,
-    **kwargs
+    **kwargs,
 ) -> list[ArrayTypes]:
     """
     The goal of this function is to extract the corresponding phase required to implement a state transition.
@@ -264,10 +272,8 @@ def get_state_phase_transitions(
         # Get the transmission matrix for the switch state
         circuit_i = sax_to_s_parameters_standard_matrix(
             # TODO maybe generalise the switch address state mapping into a corresponding function
-            switch_function(
-                sxt={"active_phase_rad": switch_state_i}
-            ),
-            **kwargs
+            switch_function(sxt={"active_phase_rad": switch_state_i}),
+            **kwargs,
         )
 
         # See if the switch state is correctly applied to the input fock states
@@ -276,7 +282,7 @@ def get_state_phase_transitions(
             output_state_i = format_electro_optic_fock_transition(
                 switch_state_array=(switch_state_i,),
                 input_fock_state_array=input_fock_state_i,
-                raw_output_state=raw_output_state_i
+                raw_output_state=raw_output_state_i,
             )
             output_states.append(output_state_i)
             # Now we need to find a way to verify that the model is correct by comparing to our expectation output.
@@ -290,7 +296,7 @@ def get_state_to_phase_map(
     input_fock_states: list[ArrayTypes] | None = None,
     target_transition_list: list[dict] | None = None,
     mode_amount: int | None = None,
-    **kwargs
+    **kwargs,
 ) -> tuple[ArrayTypes]:
     """
     The goal of this function is to extract the corresponding phase required to implement a state transition.
@@ -319,11 +325,16 @@ def get_state_to_phase_map(
 
     As such, this function will help us extract the corresponding phase for a particular switch transition.
     """
-    state_phase_transition_list = get_state_phase_transitions(switch_function=switch_function, switch_states=switch_states,
-                                                              input_fock_states=input_fock_states, mode_amount=mode_amount, **kwargs)
+    state_phase_transition_list = get_state_phase_transitions(
+        switch_function=switch_function,
+        switch_states=switch_states,
+        input_fock_states=input_fock_states,
+        mode_amount=mode_amount,
+        **kwargs,
+    )
     # TODO implement the extraction from mapping the target fock states to the corresponing phase in more generic way
-    cross_phase = extract_phase(state_phase_transition_list, transition_type='cross')
-    bar_phase = extract_phase(state_phase_transition_list, transition_type='bar')
+    cross_phase = extract_phase(state_phase_transition_list, transition_type="cross")
+    bar_phase = extract_phase(state_phase_transition_list, transition_type="bar")
     return bar_phase, cross_phase
 
 

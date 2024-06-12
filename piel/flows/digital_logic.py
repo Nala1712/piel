@@ -70,7 +70,6 @@ def generate_verilog_and_verification_from_truth_table(
     )
 
     # Determine the design directory
-    design_directory = return_path(module)
     src_folder = get_module_folder_type_location(
         module=module, folder_type="digital_source"
     )

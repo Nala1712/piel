@@ -1,4 +1,4 @@
-from ...types import ArrayTypes
+from ..core import ArrayTypes
 
 __all__ = [
     "TemperatureRangeLimitType",

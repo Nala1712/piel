@@ -1,8 +1,7 @@
 import numpy as np
 from piel.types import ArrayTypes
-from piel.models.physical.types import TemperatureRangeTypes
+from piel.types.models.physical import TemperatureRangeTypes
 from piel.materials.thermal_conductivity.types import MaterialReferenceType
-from piel.models.physical.types import TemperatureRangeLimitType
 from piel.materials import thermal_conductivity
 
 __all__ = ["get_thermal_conductivity_fit"]

@@ -1,6 +1,6 @@
 import jax.numpy as jnp
-from .types import MaterialReferenceType, MaterialReferencesTypes
-from ...models.physical.types import TemperatureRangeTypes
+from .types import MaterialReferencesTypes
+from piel.types.models.physical import TemperatureRangeTypes
 
 __all__ = ["teflon", "material_references"]
 
