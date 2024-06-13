@@ -3,4 +3,4 @@ import sax
 
 OpticalTransmissionCircuit = sax.saxtypes.Callable
 RecursiveNetlist = sax.RecursiveNetlist
-CircuitComponent = gf.Component
+PhotonicCircuitComponent = gf.Component

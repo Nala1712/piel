@@ -133,32 +133,9 @@ chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
 )
 pd.DataFrame(chain_fock_state_transmission_list)
 # CURRENT TODO Fix this so that it actually maps the phase accordingly.
+# Here we want a truth table that shows the phase mapping to the corresponding changes of the fock states accordingly.
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
-
-recursive_netlist = chain_3_mode_lattice_circuit.get_netlist_recursive(
-    allow_multiple=True
-)
-recursive_netlist.keys()
-
-switch_instance_list_i = (
-    piel.flows.interferometers.get_matched_model_recursive_netlist_instances(
-        recursive_netlist=chain_3_mode_lattice_circuit.get_netlist_recursive(
-            allow_multiple=True
-        ),
-        top_level_instance_prefix="component_lattice_generic",
-        target_component_prefix="mzi",
-        models=optical_logic_verification_models,
-    )
-)
-switch_instance_list_i
-
-piel.flows.interferometers.compose_network_matrix_from_models(
-    circuit=chain_3_mode_lattice_circuit,
-    models=optical_logic_verification_models,
-    switch_states=[0, np.pi],
-)
-
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
 
