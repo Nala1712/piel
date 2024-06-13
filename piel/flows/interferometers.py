@@ -195,7 +195,9 @@ def compose_network_matrix_from_models(
     target_component_prefix: str = "mzi",
 ):
     """
-    This function composes the network matrix from the models dictionary and the switch states. It does this by first composing the switch functions, then composing the switch matrix, then composing the network matrix. It returns the network matrix and the switch matrix.
+    This function composes the network matrix from the models dictionary and the switch states. It does this by first
+    composing the switch functions, then composing the switch matrix, then composing the network matrix. It returns
+    the network matrix and the switch matrix.
 
     Args:
         circuit (gf.Component): The circuit.
@@ -217,13 +219,6 @@ def compose_network_matrix_from_models(
     )
 
     netlist = circuit.get_netlist_recursive(allow_multiple=True)
-    # TODO finish cleaning up
-    # Now we will iterate through each netlist, and determine all the switch instances
-    # switch_fabric_switch_instance_dictionary = dict()
-    # for (
-    #     id_i,
-    #     netlist,
-    # ) in network_netlist_dictionary.items():
 
     switch_instance_list_i = get_matched_model_recursive_netlist_instances(
         recursive_netlist=netlist,
@@ -231,40 +226,29 @@ def compose_network_matrix_from_models(
         target_component_prefix=target_component_prefix,
         models=models,
     )
-    # switch_fabric_switch_instance_dictionary[id_i] = switch_instance_list_i
 
-    # Apply phases and determine the output
+    # Compute corresponding phases onto each switch and determine the output
     switch_fabric_switch_phase_configurations = dict()
-    # for (
-    #     id_i,
-    #     switch_instance_list_i,
-    # ) in switch_fabric_switch_instance_dictionary.items():
-    print("switch_instance_list_i")
-    print(switch_instance_list_i)
     switch_amount = len(switch_instance_list_i)
     switch_instance_valid_phase_configurations_i = []
     for phase_configuration_i in product(switch_states, repeat=switch_amount):
         switch_instance_valid_phase_configurations_i.append(phase_configuration_i)
-    # switch_fabric_switch_phase_configurations[
-    #     id_i
-    # ] = switch_instance_valid_phase_configurations_i
 
+    # Apply corresponding phases onto switches
     switch_fabric_switch_phase_address_state = compose_phase_address_state(
         switch_instance_map=switch_instance_list_i,
         switch_phase_permutation_map=switch_instance_valid_phase_configurations_i,
     )
-    print("switch_fabric_switch_phase_address_state")
-    print(switch_fabric_switch_phase_address_state)
 
     switch_fabric_switch_function_parameter_state = compose_switch_function_parameter_state(
-            switch_phase_address_state=switch_fabric_switch_phase_address_state
+        switch_phase_address_state=switch_fabric_switch_phase_address_state
     )
-    print("switch_fabric_switch_function_parameter_state")
-    print(switch_fabric_switch_function_parameter_state)
+
     switch_fabric_switch_unitaries = calculate_switch_unitaries(
         circuit=switch_fabric_circuit,
         switch_function_parameter_state=switch_fabric_switch_function_parameter_state,
     )
+
     return (
         switch_fabric_switch_unitaries,
         switch_fabric_switch_function_parameter_state,
