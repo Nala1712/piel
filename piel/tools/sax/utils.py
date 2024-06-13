@@ -7,8 +7,6 @@ from ..gdsfactory.netlist import get_matched_ports_tuple_index
 from ...utils import round_complex_array
 from typing import Optional  # NOQA : F401
 
-__all__ = ["get_sdense_ports_index", "sax_to_s_parameters_standard_matrix", "snet"]
-
 
 def get_sdense_ports_index(input_ports_order: tuple, all_ports_index: dict) -> dict:
     """
@@ -209,7 +207,9 @@ def sax_to_s_parameters_standard_matrix(
     # s_parameters_standard_matrix = s_parameters_standard_matrix.T
 
     if round_int:
-        s_parameters_standard_matrix = round_complex_array(s_parameters_standard_matrix, **kwargs)
+        s_parameters_standard_matrix = round_complex_array(
+            s_parameters_standard_matrix, **kwargs
+        )
 
     value = s_parameters_standard_matrix, input_matched_ports_name_tuple_order
     return value

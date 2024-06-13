@@ -1,9 +1,17 @@
+import gdsfactory as gf
 import jax.numpy as jnp
+from itertools import product
 from typing import Optional, Callable
+from ..tools.sax.netlist import (
+    address_value_dictionary_to_function_parameter_dictionary,
+    get_matched_model_recursive_netlist_instances,
+)
+from ..tools.sax.utils import sax_to_s_parameters_standard_matrix
+from ..integration.thewalrus_qutip import fock_transition_probability_amplitude
+from .electro_optic import generate_s_parameter_circuit_from_photonic_circuit
 
 
 def compose_phase_address_state(
-    circuits: dict,
     switch_instance_map: dict,
     switch_phase_permutation_map: dict,
 ) -> dict:
@@ -21,24 +29,18 @@ def compose_phase_address_state(
         phase_shifter_address_state (dict): The dictionary of the phase shifter address state.
     """
     phase_shifter_address_state = dict()
-    for id_i, _ in circuits.items():
-        instance_address_list_i = switch_instance_map[id_i]
-        switch_phase_list_i = switch_phase_permutation_map[id_i]
-        # Create the corresponding dictionary mapping for this circuit
-        phase_shifter_address_state[id_i] = dict()
-
-        for i in range(len(switch_phase_list_i)):
-            phase_shifter_address_state[id_i][i] = dict()
-            phase_shifter_address_state[id_i][i].update(
-                {
-                    instance_address_i: switch_phase_i
-                    for instance_address_i, switch_phase_i in zip(
-                        instance_address_list_i,
-                        switch_phase_list_i[i],
-                        strict=False,
-                    )
-                }
-            )
+    for i in range(len(switch_phase_permutation_map)):
+        phase_shifter_address_state[i] = dict()
+        phase_shifter_address_state[i].update(
+            {
+                instance_address_i: switch_phase_i
+                for instance_address_i, switch_phase_i in zip(
+                    switch_instance_map,
+                    switch_phase_permutation_map[i],
+                    strict=False,
+                )
+            }
+        )
     return phase_shifter_address_state
 
 
@@ -81,7 +83,7 @@ def calculate_switch_unitaries(
             sax_s_parameters_i = circuit_i(**function_parameter_state_i)
             implemented_unitary_dictionary[id_i][
                 id_i_i
-            ] = piel.sax_to_s_parameters_standard_matrix(sax_s_parameters_i)
+            ] = sax_to_s_parameters_standard_matrix(sax_s_parameters_i)
     return implemented_unitary_dictionary
 
 
@@ -98,7 +100,7 @@ def calculate_all_transition_probability_amplitudes(
     for input_fock_state in input_fock_states:
         for output_fock_state in output_fock_states:
             fock_transition_probability_amplitude_i = (
-                piel.fock_transition_probability_amplitude(
+                fock_transition_probability_amplitude(
                     initial_fock_state=input_fock_state,
                     final_fock_state=output_fock_state,
                     unitary_matrix=unitary_matrix,
@@ -196,8 +198,8 @@ def construct_unitary_transition_probability_performance(
 
 
 def compose_network_matrix_from_models(
-    network_netlist_dictionary: dict,
-    models_dictionary: dict,
+    circuit: gf.Component,
+    models: dict,
     switch_states: list,
     top_level_instance_prefix: str = "component_lattice_gener",
     target_component_prefix: str = "straight_heater_metal_s",
@@ -206,8 +208,8 @@ def compose_network_matrix_from_models(
     This function composes the network matrix from the models dictionary and the switch states. It does this by first composing the switch functions, then composing the switch matrix, then composing the network matrix. It returns the network matrix and the switch matrix.
 
     Args:
-        network_netlist_dictionary (dict): The dictionary of the network netlists.
-        models_dictionary (dict): The dictionary of the models.
+        circuit (gf.Component): The circuit.
+        models (dict): The models dictionary.
         switch_states (list): The list of switch states.
         top_level_instance_prefix (str): The top level instance prefix.
         target_component_prefix (str): The target component prefix.
@@ -219,43 +221,44 @@ def compose_network_matrix_from_models(
     (
         switch_fabric_circuits,
         switch_fabric_circuits_info_i,
-    ) = create_switch_functions_from_netlist_dictionaries(
-        network_netlist_dictionary=network_netlist_dictionary,
-        models=models_dictionary,
+    ) = generate_s_parameter_circuit_from_photonic_circuit(
+        circuit=circuit,
+        models=models,
     )
 
+    netlist = circuit.get_netlist_recursive(allow_multiple=True)
+    # TODO finish cleaning up
     # Now we will iterate through each netlist, and determine all the switch instances
-    switch_fabric_switch_instance_dictionary = dict()
-    for (
-        id_i,
-        netlist,
-    ) in network_netlist_dictionary.items():
-        switch_instance_list_i = piel.get_matched_model_recursive_netlist_instances(
-            recursive_netlist=netlist,
-            top_level_instance_prefix=top_level_instance_prefix,
-            target_component_prefix=target_component_prefix,
-            models=models_dictionary,
-        )
-        switch_fabric_switch_instance_dictionary[id_i] = switch_instance_list_i
+    # switch_fabric_switch_instance_dictionary = dict()
+    # for (
+    #     id_i,
+    #     netlist,
+    # ) in network_netlist_dictionary.items():
+    switch_instance_list_i = get_matched_model_recursive_netlist_instances(
+        recursive_netlist=netlist,
+        top_level_instance_prefix=top_level_instance_prefix,
+        target_component_prefix=target_component_prefix,
+        models=models,
+    )
+    # switch_fabric_switch_instance_dictionary[id_i] = switch_instance_list_i
 
     # Apply phases and determine the output
     switch_fabric_switch_phase_configurations = dict()
-    for (
-        id_i,
-        switch_instance_list_i,
-    ) in switch_fabric_switch_instance_dictionary.items():
-        switch_amount = len(switch_instance_list_i)
-        switch_instance_valid_phase_configurations_i = []
-        for phase_configuration_i in product(switch_states, repeat=switch_amount):
-            switch_instance_valid_phase_configurations_i.append(phase_configuration_i)
-        switch_fabric_switch_phase_configurations[
-            id_i
-        ] = switch_instance_valid_phase_configurations_i
+    # for (
+    #     id_i,
+    #     switch_instance_list_i,
+    # ) in switch_fabric_switch_instance_dictionary.items():
+    switch_amount = len(switch_instance_list_i)
+    switch_instance_valid_phase_configurations_i = []
+    for phase_configuration_i in product(switch_states, repeat=switch_amount):
+        switch_instance_valid_phase_configurations_i.append(phase_configuration_i)
+    # switch_fabric_switch_phase_configurations[
+    #     id_i
+    # ] = switch_instance_valid_phase_configurations_i
 
     switch_fabric_switch_phase_address_state = compose_phase_address_state(
-        circuits=switch_fabric_circuits,
-        switch_instance_map=switch_fabric_switch_instance_dictionary,
-        switch_phase_permutation_map=switch_fabric_switch_phase_configurations,
+        switch_instance_map=switch_instance_list_i,
+        switch_phase_permutation_map=switch_instance_valid_phase_configurations_i,
     )
 
     switch_fabric_switch_function_parameter_state = (
@@ -273,7 +276,7 @@ def compose_network_matrix_from_models(
         switch_fabric_switch_phase_address_state,
         switch_fabric_switch_phase_address_state,
         switch_fabric_switch_phase_configurations,
-        switch_fabric_switch_instance_dictionary,
+        switch_instance_list_i,
         switch_fabric_circuits,
         switch_fabric_circuits_info_i,
     )
