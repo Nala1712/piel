@@ -300,7 +300,6 @@ def compose_network_matrix_from_models(
         switch_fabric_switch_unitaries,
         switch_fabric_switch_function_parameter_state,
         switch_fabric_switch_phase_address_state,
-        switch_fabric_switch_phase_address_state,
         switch_fabric_switch_phase_configurations,
         switch_instance_list_i,
         switch_fabric_circuit,
@@ -338,6 +337,21 @@ def extract_phase_from_fock_state_transition_list(
 
     raise ValueError(f"Phase for the {transition_type} transition not found.")
 
+
+def extract_phase_tuple_from_phase_address_state(phase_address_state):
+    """
+    Extracts phase values from a dictionary where keys are tuples representing components and values are the phase values.
+
+    Args:
+        phase_address_state (dict): The dictionary with tuple keys representing components and their phase values.
+
+    Returns:
+        list of tuples: A list containing tuples of the phase values.
+    """
+    # Iterate through the dictionary and collect the phase values
+    phases = [phase for _, phase in phase_address_state.items()]
+
+    return tuple(phases) # TODO unhack this
 
 def format_electro_optic_fock_transition(
     switch_state_array: ArrayTypes,
@@ -494,7 +508,6 @@ def get_state_phase_transitions(
         circuit_unitaries,
         circuit_function_parameter_state,
         circuit_phase_address_state,
-        circuit_phase_address_state,
         circuit_phase_configurations,
         instance_list_i,
         fabric_circuit,
@@ -507,14 +520,22 @@ def get_state_phase_transitions(
     )
 
     id_i = 0
-    for unitary_i in circuit_unitaries:
+    for unitary_i, ports_i in circuit_unitaries.values():
         data_i = calculate_classical_transition_probability_amplitudes(
             unitary_matrix=unitary_i,
             input_fock_states=input_fock_states,
             target_mode_index=target_mode_index,
             determine_ideal_mode_function=determine_ideal_mode_function,
         )
-        output_states.append(data_i)
+
+        for id_i, _ in data_i.items():
+            output_state_i = format_electro_optic_fock_transition(
+                switch_state_array=extract_phase_tuple_from_phase_address_state(circuit_phase_address_state[id_i]),
+                input_fock_state_array=data_i[id_i]["input_fock_state"],
+                raw_output_state=data_i[id_i]["classical_transition_mode_probability"],
+                target_mode=int(data_i[id_i]["classical_transition_target_mode_probability"]),
+            )
+            output_states.append(output_state_i)
         id_i += 1
 
     return output_states

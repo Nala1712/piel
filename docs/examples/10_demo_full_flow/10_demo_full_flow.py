@@ -117,23 +117,21 @@ optical_logic_verification_models[
     "straight_heater_metal_undercut_length200"
 ] = optical_logic_verification_models["straight_heater_metal_undercut"]
 
-(
-    discrete_lattice_transmission_circuit,
-    discrete_lattice_transmission_circuit_info,
-) = piel.flows.generate_s_parameter_circuit_from_photonic_circuit(
-    circuit=chain_3_mode_lattice_circuit, models=optical_logic_verification_models
-)
-
 # Now, we need to compute our transmission information accordingly for a given set of optical inputs:
 
 chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
     circuit_component=chain_3_mode_lattice_circuit,
-    circuit_transmission_function=discrete_lattice_transmission_circuit,
+    models=optical_logic_verification_models,
     mode_amount=3,
+    target_mode_index=2,
 )
 pd.DataFrame(chain_fock_state_transmission_list)
 # CURRENT TODO Fix this so that it actually maps the phase accordingly.
 # Here we want a truth table that shows the phase mapping to the corresponding changes of the fock states accordingly.
+
+
+
+pd.DataFrame(chain_fock_state_transmission_list[2]).T
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
 
