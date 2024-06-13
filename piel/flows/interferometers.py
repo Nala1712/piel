@@ -71,19 +71,17 @@ def compose_switch_function_parameter_state(
 
 
 def calculate_switch_unitaries(
-    circuits: dict,
+    circuit: Callable,
     switch_function_parameter_state: dict,
 ) -> dict:
     implemented_unitary_dictionary = dict()
-    for id_i, circuit_i in circuits.items():
-        implemented_unitary_dictionary[id_i] = dict()
-        for id_i_i, function_parameter_state_i in switch_function_parameter_state[
-            id_i
-        ].items():
-            sax_s_parameters_i = circuit_i(**function_parameter_state_i)
-            implemented_unitary_dictionary[id_i][
-                id_i_i
-            ] = sax_to_s_parameters_standard_matrix(sax_s_parameters_i)
+    # for id_i, circuit_i in circuits.items():
+    implemented_unitary_dictionary = dict()
+    for id_i, function_parameter_state_i in switch_function_parameter_state.items():
+        sax_s_parameters_i = circuit(**function_parameter_state_i)
+        implemented_unitary_dictionary[id_i] = sax_to_s_parameters_standard_matrix(
+            sax_s_parameters_i
+        )
     return implemented_unitary_dictionary
 
 
@@ -219,8 +217,8 @@ def compose_network_matrix_from_models(
     """
     # Compose the netlists as functions
     (
-        switch_fabric_circuits,
-        switch_fabric_circuits_info_i,
+        switch_fabric_circuit,
+        switch_fabric_circuit_info_i,
     ) = generate_s_parameter_circuit_from_photonic_circuit(
         circuit=circuit,
         models=models,
@@ -267,7 +265,7 @@ def compose_network_matrix_from_models(
         )
     )
     switch_fabric_switch_unitaries = calculate_switch_unitaries(
-        circuits=switch_fabric_circuits,
+        circuit=switch_fabric_circuit,
         switch_function_parameter_state=switch_fabric_switch_function_parameter_state,
     )
     return (
@@ -277,6 +275,6 @@ def compose_network_matrix_from_models(
         switch_fabric_switch_phase_address_state,
         switch_fabric_switch_phase_configurations,
         switch_instance_list_i,
-        switch_fabric_circuits,
-        switch_fabric_circuits_info_i,
+        switch_fabric_circuit,
+        switch_fabric_circuit_info_i,
     )

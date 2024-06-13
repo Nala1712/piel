@@ -136,11 +136,9 @@ pd.DataFrame(chain_fock_state_transmission_list)
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
 
-compose_network_matrix_from_models(
-    network_netlist_dictionary=chain_3_mode_lattice_circuit.get_netlist_recursive(
-        allow_multiple=True
-    ),
-    models_dictionary=optical_logic_verification_models,
+piel.flows.interferometers.compose_network_matrix_from_models(
+    circuit=chain_3_mode_lattice_circuit,
+    models=optical_logic_verification_models,
     switch_states=[0, np.pi],
     top_level_instance_prefix="component_lattice_gener",
     target_component_prefix="straight_heater_metal_undercut",
