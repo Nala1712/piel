@@ -77,12 +77,6 @@ def compose_recursive_instance_location(
     i = 0
 
     while len(required_models) != 0:
-        print("model_composition_mapping")
-        print(model_composition_mapping)
-        print("required_models")
-        print(required_models)
-        print("target_component_mapping")
-        print(target_component_mapping)
 
         # if len(required_models) == 0:
         #     pass
@@ -94,29 +88,20 @@ def compose_recursive_instance_location(
         # see if they match our active component name.
         for required_model_name_i in required_models:
             # Appends required_models_i from subcomponent to the required_models input based on the models provided.
-            print("required_model_name_i")
-            print(required_model_name_i)
 
             try:
-                print("{**models, **model_composition_mapping}")
-                print({**models, **model_composition_mapping})
                 required_models_i = sax.get_required_circuit_models(
                     recursive_netlist[required_model_name_i],
                     # TODO make this recursive so it can search inside? This will never have to be 2D as all models
                     #  outside.
                     models={**models, **model_composition_mapping},
                 )  # eg. ["straight_heater_metal_s_ad3c1693"]
-                print("required_models_i")
-                print(required_models_i)
             except:
                 required_models_i = []
 
             # Check if required_model_name_i already composed.
 
             # Check that the model composition mapping has not already fulfilled this model.
-            print("herea")
-            print(required_models_i)
-
             if len(required_models_i) != 0:
                 if required_model_name_i in model_composition_mapping:
                     required_models.remove(required_model_name_i)
@@ -139,8 +124,6 @@ def compose_recursive_instance_location(
             # This model is now at a particular level of recursion, let's check if this is the model we want in the
             # required composed models.
             for required_model_name_i_i in required_models_i:
-                print("required_model_name_i_i")
-                print(required_model_name_i_i)
                 if required_model_name_i_i.startswith(target_component_prefix):
                     # Yes, this is the model we want. Can we compose the instance location?
                     target_component_mapping.update(
@@ -287,8 +270,6 @@ def get_matched_model_recursive_netlist_instances(
         recursive_netlist[top_level_instance_name],
         models=models,
     )
-    print("top_level_required_models")
-    print(top_level_required_models)
 
     (
         model_composition_mapping,
@@ -301,14 +282,6 @@ def get_matched_model_recursive_netlist_instances(
         target_component_prefix=target_component_prefix,
         models=models,
     )
-    print("here1")
-    print("model_composition_mapping")
-    print(model_composition_mapping)
-    print("instance_composition_mapping")
-    print(instance_composition_mapping)
-    print("target_component_mapping")
-    print(target_component_mapping)
-    print("here2")
 
     # Now we have the raw data that creates the mapping of the components-to-instances, in order to create the
     # corresponding instance address indexes that we can use to control our matching element parameters.
