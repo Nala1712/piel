@@ -9,6 +9,7 @@ from .core import (
 )
 from .tools.amaranth import AmaranthTruthTable, AmaranthLogicSignals
 from .tools.cocotb import CocoTBSimulator, CocoTBTopLevelLanguage
+from .tools.sax import PortsTuple, SParameterMatrixTuple
 from .models.electrical import (
     CoaxialCableGeometryType,
     CoaxialCableHeatTransferType,

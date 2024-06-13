@@ -9,6 +9,7 @@ from ..tools.sax.netlist import (
 from ..tools.sax.utils import sax_to_s_parameters_standard_matrix
 from ..integration.thewalrus_qutip import fock_transition_probability_amplitude
 from .electro_optic import generate_s_parameter_circuit_from_photonic_circuit
+from ..types import ArrayTypes, FockStatePhaseTransitionType
 
 
 def compose_phase_address_state(
@@ -21,7 +22,6 @@ def compose_phase_address_state(
     state.
 
     Args:
-        circuits (dict): The dictionary of the circuits.
         switch_instance_map (dict): The dictionary of the switch instances.
         switch_phase_permutation_map (dict): The dictionary of the switch phase permutations.
 
@@ -59,7 +59,9 @@ def compose_switch_function_parameter_state(
     """
     phase_shifter_function_parameter_state = dict()
     for id_i, phase_address_map in switch_phase_address_state.items():
-        phase_shifter_function_parameter_state[id_i] = address_value_dictionary_to_function_parameter_dictionary(
+        phase_shifter_function_parameter_state[
+            id_i
+        ] = address_value_dictionary_to_function_parameter_dictionary(
             address_value_dictionary=phase_address_map,
             parameter_key="active_phase_rad",
         )
@@ -69,11 +71,13 @@ def compose_switch_function_parameter_state(
 def calculate_switch_unitaries(
     circuit: Callable,
     switch_function_parameter_state: dict,
-) -> dict:
+):
     implemented_unitary_dictionary = dict()
     for id_i, function_parameter_state_i in switch_function_parameter_state.items():
         sax_s_parameters_i = circuit(**function_parameter_state_i)
-        implemented_unitary_dictionary[id_i] = sax_to_s_parameters_standard_matrix(sax_s_parameters_i)
+        implemented_unitary_dictionary[id_i] = sax_to_s_parameters_standard_matrix(
+            sax_s_parameters_i
+        )
     return implemented_unitary_dictionary
 
 
@@ -81,9 +85,17 @@ def calculate_all_transition_probability_amplitudes(
     unitary_matrix: jnp.ndarray,
     input_fock_states: list,
     output_fock_states: list,
-) -> dict:
+) -> dict[int, FockStatePhaseTransitionType]:
     """
     This tells us the transition probabilities between our photon states for a particular implemented unitary.
+
+    Args:
+        unitary_matrix (jnp.ndarray): The unitary matrix.
+        input_fock_states (list): The list of input Fock states.
+        output_fock_states (list): The list of output Fock states.
+
+    Returns:
+        dict[int, FockStatePhaseTransitionType]: The dictionary of the Fock state phase transition type.
     """
     i = 0
     circuit_transition_probability_data_i = dict()
@@ -107,8 +119,8 @@ def calculate_all_transition_probability_amplitudes(
 
 
 def calculate_classical_transition_probability_amplitudes(
-    unitary_matrix: jnp.ndarray,
-    input_fock_states: list,
+    unitary_matrix: ArrayTypes,
+    input_fock_states: list[ArrayTypes],
     target_mode_index: Optional[int] = None,
     determine_ideal_mode_function: Optional[Callable] = None,
 ) -> dict:
@@ -169,9 +181,19 @@ def construct_unitary_transition_probability_performance(
     unitary_phase_implementations_dictionary: dict,
     input_fock_states: list,
     output_fock_states: list,
-):
+) -> dict[int, dict[int, FockStatePhaseTransitionType]]:
     """
-    This function determines the Fock state probability performance for a given implemented unitary. This means we iterate over each circuit, then each implemented unitary, and we determine the probability transformation accordingly.
+    This function determines the Fock state probability performance for a given implemented unitary. This means we
+    iterate over each circuit, then each implemented unitary, and we determine the probability transformation
+    accordingly.
+
+    Args:
+        unitary_phase_implementations_dictionary (dict): The dictionary of the unitary phase implementations.
+        input_fock_states (list): The list of input Fock states.
+        output_fock_states (list): The list of output Fock states.
+
+    Returns:
+        implemented_unitary_probability_dictionary (dict): The dictionary of the implemented unitary probability.
     """
     implemented_unitary_probability_dictionary = dict()
     for id_i, circuit_unitaries_i in unitary_phase_implementations_dictionary.items():
@@ -240,8 +262,10 @@ def compose_network_matrix_from_models(
         switch_phase_permutation_map=switch_instance_valid_phase_configurations_i,
     )
 
-    switch_fabric_switch_function_parameter_state = compose_switch_function_parameter_state(
-        switch_phase_address_state=switch_fabric_switch_phase_address_state
+    switch_fabric_switch_function_parameter_state = (
+        compose_switch_function_parameter_state(
+            switch_phase_address_state=switch_fabric_switch_phase_address_state
+        )
     )
 
     switch_fabric_switch_unitaries = calculate_switch_unitaries(

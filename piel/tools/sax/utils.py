@@ -5,6 +5,7 @@ import jax.numpy as jnp
 import sax
 from ..gdsfactory.netlist import get_matched_ports_tuple_index
 from ...utils import round_complex_array
+from ...types import SParameterMatrixTuple
 from typing import Optional  # NOQA : F401
 
 
@@ -53,7 +54,7 @@ def sax_to_s_parameters_standard_matrix(
     round_int: bool | None = None,
     *args,
     **kwargs
-) -> tuple:
+) -> SParameterMatrixTuple:
     """
     A ``sax`` S-parameter SDict is provided as a dictionary of tuples with (port0, port1) as the key. This
     determines the direction of the scattering relationship. It means that the number of terms in an S-parameter
@@ -202,9 +203,6 @@ def sax_to_s_parameters_standard_matrix(
         :, input_ports_index_tuple_order_jax
     ].get()
     # Now we select the SDense rows that we care about after transposing the matrix.
-
-    # TODO REMOVE: No need to transpose this was wrong before
-    # s_parameters_standard_matrix = s_parameters_standard_matrix.T
 
     if round_int:
         s_parameters_standard_matrix = round_complex_array(
