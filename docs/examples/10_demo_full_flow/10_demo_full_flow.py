@@ -113,20 +113,22 @@ optical_logic_verification_models = piel.models.frequency.get_default_models(
     type="optical_logic_verification"
 )
 # A specific custom addition to our application:
-optical_logic_verification_models["straight_heater_metal_undercut_length200"] = optical_logic_verification_models["straight_heater_metal_undercut"]
+optical_logic_verification_models[
+    "straight_heater_metal_undercut_length200"
+] = optical_logic_verification_models["straight_heater_metal_undercut"]
 
 (
     discrete_lattice_transmission_circuit,
     discrete_lattice_transmission_circuit_info,
 ) = piel.flows.generate_s_parameter_circuit_from_photonic_circuit(
-    circuit=chain_3_mode_lattice_circuit,
-    models=optical_logic_verification_models
+    circuit=chain_3_mode_lattice_circuit, models=optical_logic_verification_models
 )
 
 # Now, we need to compute our transmission information accordingly for a given set of optical inputs:
 
 chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
-    switch_function=discrete_lattice_transmission_circuit,
+    circuit_component=chain_3_mode_lattice_circuit,
+    circuit_transmission_function=discrete_lattice_transmission_circuit,
     mode_amount=3,
 )
 pd.DataFrame(chain_fock_state_transmission_list)
@@ -134,6 +136,15 @@ pd.DataFrame(chain_fock_state_transmission_list)
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
 
+compose_network_matrix_from_models(
+    network_netlist_dictionary=chain_3_mode_lattice_circuit.get_netlist_recursive(
+        allow_multiple=True
+    ),
+    models_dictionary=optical_logic_verification_models,
+    switch_states=[0, np.pi],
+    top_level_instance_prefix="component_lattice_gener",
+    target_component_prefix="straight_heater_metal_undercut",
+)
 
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
@@ -249,13 +260,14 @@ import pandas as pd
 import sax
 from typing import Callable
 
+
 def compute_simulation_unitaries(
     simulation_data: pd.DataFrame,
     phase_mapping_function: Callable,
     data_series_key: str,
     netlist: dict,
     model_library: dict,
-    input_ports_order: tuple | None = None
+    input_ports_order: tuple | None = None,
 ) -> List[Any]:
     """
     Processes simulation data to generate a list of unitaries using a digital-to-phase model and a custom library.
@@ -277,7 +289,7 @@ def compute_simulation_unitaries(
     # Generate phase array using the provided phase mapping function
     data_series = simulation_data[data_series_key]
     phase_array = phase_mapping_function(data_series=data_series, phase_map=phase_map)
-    simulation_data['phase'] = phase_array
+    simulation_data["phase"] = phase_array
 
     # Create the circuit model using the netlist and custom library
     circuit_model, _ = sax.circuit(netlist=netlist, models=custom_library)
@@ -291,41 +303,43 @@ def compute_simulation_unitaries(
 
     return unitaries
 
-def compute_simulation_unitaries():
-    # Inputs
-    # digital-to-phase model
-    # simulation data file
-    # sax-circuit-model library
-    # output returns list of unitaries accordingly
 
-    # basic_ideal_phase_array = (
-    #     piel.models.logic.electro_optic.return_phase_array_from_data_series(
-    #         data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
-    #     )
-    # )
+# def compute_simulation_unitaries():
+# Inputs
+# digital-to-phase model
+# simulation data file
+# sax-circuit-model library
+# output returns list of unitaries accordingly
 
-    # example_simple_simulation_data["phase"] = basic_ideal_phase_array
-    # example_simple_simulation_data
+# basic_ideal_phase_array = (
+#     piel.models.logic.electro_optic.return_phase_array_from_data_series(
+#         data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
+#     )
+# )
 
-    # our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
-    #     {"straight_heater_metal_undercut": straight_heater_metal_simple}
-    # )
-    # our_custom_library
+# example_simple_simulation_data["phase"] = basic_ideal_phase_array
+# example_simple_simulation_data
 
-    # mzi2x2_model, mzi2x2_model_info = sax.circuit(
-    #     netlist=mzi2x2_2x2_phase_shifter_netlist, models=our_custom_library
-    # )
-    # piel.sax_to_s_parameters_standard_matrix(mzi2x2_model(), input_ports_order=("o2", "o1"))
+# our_custom_library = piel.models.frequency.compose_custom_model_library_from_defaults(
+#     {"straight_heater_metal_undercut": straight_heater_metal_simple}
+# )
+# our_custom_library
 
-    # mzi2x2_active_unitary_array = list()
-    # for phase_i in example_simple_simulation_data.phase:
-    #     mzi2x2_active_unitary_i = piel.sax_to_s_parameters_standard_matrix(
-    #         mzi2x2_model(sxt={"active_phase_rad": phase_i}),
-    #         input_ports_order=(
-    #             "o2",
-    #             "o1",
-    #         ),
-    #     )
+# mzi2x2_model, mzi2x2_model_info = sax.circuit(
+#     netlist=mzi2x2_2x2_phase_shifter_netlist, models=our_custom_library
+# )
+# piel.sax_to_s_parameters_standard_matrix(mzi2x2_model(), input_ports_order=("o2", "o1"))
+
+# mzi2x2_active_unitary_array = list()
+# for phase_i in example_simple_simulation_data.phase:
+#     mzi2x2_active_unitary_i = piel.sax_to_s_parameters_standard_matrix(
+#         mzi2x2_model(sxt={"active_phase_rad": phase_i}),
+#         input_ports_order=(def compose_network_matrix_from_models(
+# Compose the netlists as functions
+#             "o2",
+#             "o1",
+#         ),
+#     )
 #     mzi2x2_active_unitary_array.append(mzi2x2_active_unitary_i)
 
 
