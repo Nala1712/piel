@@ -125,15 +125,49 @@ chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
     mode_amount=3,
     target_mode_index=2,
 )
-pd.DataFrame(chain_fock_state_transmission_list)
-# CURRENT TODO Fix this so that it actually maps the phase accordingly.
-# Here we want a truth table that shows the phase mapping to the corresponding changes of the fock states accordingly.
-
-
-
-pd.DataFrame(chain_fock_state_transmission_list[2]).T
+raw_optical_transmission_table = pd.DataFrame(chain_fock_state_transmission_list)
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
+#
+# Let's start by extracting our desired optical logic implementation:
+
+target_implementation_optical_logic_table = raw_optical_transmission_table[
+    raw_optical_transmission_table["target_mode_output"] == 1
+].copy()
+target_implementation_optical_logic_table
+
+# Now, each of these electronic phases applied correspond to a given digital value that we want to impelment on the electronic logic.
+
+basic_ideal_phase_map = piel.models.logic.electro_optic.linear_bit_phase_map(
+    bits_amount=5, final_phase_rad=np.pi, initial_phase_rad=0
+)
+basic_ideal_phase_map
+
+target_implementation_optical_logic_table[
+    "phase_bit"
+] = piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
+    dataframe=target_implementation_optical_logic_table,
+    phase_column_name="phase",
+    phase_bit_dataframe=basic_ideal_phase_map,
+    phase_series_name="phase",
+    bit_series_name="bits",
+)
+target_implementation_optical_logic_table
+
+# +
+input_ports_list = ["input_fock_state"]
+output_ports_list = ["phase_bit"]
+
+
+target_truth_table = (
+    piel.flows.digital_electro_optic.convert_dataframe_to_truth_table_dictionary(
+        truth_table_dataframe=target_implementation_optical_logic_table,
+        input_ports=input_ports_list,
+        output_ports=output_ports_list,
+    )
+)
+target_truth_table
+# -
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
 
@@ -142,17 +176,10 @@ pd.DataFrame(chain_fock_state_transmission_list[2]).T
 # Inputs truth table, input port list, output port list, module
 # No outputs
 
-detector_phase_truth_table = {
-    "detector_in": ["00", "01", "10", "11"],
-    "phase_map_out": ["00", "10", "11", "11"],
-}
-
 # Define all the relevant ports from the dictionary
-input_ports_list = ["detector_in"]
-output_ports_list = ["phase_map_out"]
 
 piel.flows.generate_verilog_and_verification_from_truth_table(
-    truth_table=detector_phase_truth_table,
+    truth_table=target_truth_table,
     input_ports=input_ports_list,
     output_ports=output_ports_list,
     module=full_flow_demo,
@@ -182,7 +209,7 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 
 piel.integration.create_cocotb_truth_table_verification_python_script(
     module=full_flow_demo,
-    truth_table=detector_phase_truth_table,
+    truth_table=target_truth_table,
     test_python_module_name="test_top",
 )
 
@@ -424,7 +451,7 @@ layout_amaranth_truth_table_through_openlane(
     inputs_name_list=input_ports_list,
     outputs_name_list=output_ports_list,
     parent_directory=amaranth_driven_flow,
-    openlane_version="v1",
+    openlane_version="v2",
 )
 
 # ## 4a. Driver-Amplfier Modelling

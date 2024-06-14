@@ -32,5 +32,6 @@ from .flows.electro_optic import PhaseTransitionTypes
 from .type_conversion import (
     absolute_to_threshold,
     convert_array_type,
+    convert_tuple_to_string,
     convert_2d_array_to_string,
 )

@@ -1,6 +1,7 @@
 """
 This file provides a set of utilities in converting between common data types to represent information between different toolsets.
 """
+from functools import partial
 import jax.numpy as jnp
 import numpy as np
 import qutip
@@ -46,9 +47,17 @@ def convert_array_type(array: ArrayTypes, output_type: PackageArrayType):
                 array = tuple(i[0] for i in array)
             else:
                 raise ValueError("The tuple must be a tuple of integers.")
+    elif output_type == "str":
+        if type(array) is str:
+            pass
+        else:
+            array = "".join(str(value) for value in array)
     else:
         raise ValueError("The output type must be either 'qutip' or 'jax'.")
     return array
+
+
+convert_tuple_to_string = partial(convert_array_type, output_type="str")
 
 
 def convert_2d_array_to_string(list_2D: list[list]):
@@ -62,6 +71,8 @@ def convert_2d_array_to_string(list_2D: list[list]):
         binary_string (str): A string of binary data.
 
     Usage:
+
+    .. code::
 
         list_2D=[[0], [0], [0], [1]]
         convert_2d_array_to_string(list_2D)

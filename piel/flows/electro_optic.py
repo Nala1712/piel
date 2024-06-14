@@ -351,7 +351,8 @@ def extract_phase_tuple_from_phase_address_state(phase_address_state):
     # Iterate through the dictionary and collect the phase values
     phases = [phase for _, phase in phase_address_state.items()]
 
-    return tuple(phases) # TODO unhack this
+    return tuple(phases)  # TODO unhack this
+
 
 def format_electro_optic_fock_transition(
     switch_state_array: ArrayTypes,
@@ -530,36 +531,19 @@ def get_state_phase_transitions(
 
         for id_i, _ in data_i.items():
             output_state_i = format_electro_optic_fock_transition(
-                switch_state_array=extract_phase_tuple_from_phase_address_state(circuit_phase_address_state[id_i]),
+                switch_state_array=extract_phase_tuple_from_phase_address_state(
+                    circuit_phase_address_state[id_i]
+                ),
                 input_fock_state_array=data_i[id_i]["input_fock_state"],
                 raw_output_state=data_i[id_i]["classical_transition_mode_probability"],
-                target_mode=int(data_i[id_i]["classical_transition_target_mode_probability"]),
+                target_mode_output=int(
+                    data_i[id_i]["classical_transition_target_mode_probability"]
+                ),
             )
             output_states.append(output_state_i)
         id_i += 1
 
     return output_states
-    #
-    # for switch_state_i in switch_states:
-    #     # Get the transmission matrix for the switch state
-    #     circuit_i = sax_to_s_parameters_standard_matrix(
-    #         # TODO maybe generalise the switch address state mapping into a corresponding function
-    #         circuit_transmission_function(sxt={"active_phase_rad": switch_state_i}),
-    #         **kwargs,
-    #     )
-    #
-    #     # See if the switch state is correctly applied to the input fock states
-    #     for input_fock_state_i in input_fock_states:
-    #         raw_output_state_i = jnp.dot(circuit_i[0], input_fock_state_i)
-    #         output_state_i = format_electro_optic_fock_transition(
-    #             switch_state_array=(switch_state_i,),
-    #             input_fock_state_array=input_fock_state_i,
-    #             raw_output_state=raw_output_state_i,
-    #         )
-    #         output_states.append(output_state_i)
-    #         # Now we need to find a way to verify that the model is correct by comparing to our expectation output.
-    #         # We can do this by comparing the output state to the target fock state.
-    # return output_states
 
 
 def get_state_to_phase_map(

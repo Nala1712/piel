@@ -126,7 +126,7 @@ example_simple_simulation_data
 # We can get the phase that is mapped to this electronic data accordingly:
 
 basic_ideal_phase_array = (
-    piel.models.logic.electro_optic.return_phase_array_from_data_series(
+    piel.flows.digital_electro_optic.return_phase_array_from_data_series(
         data_series=example_simple_simulation_data.x, phase_map=basic_ideal_phase_map
     )
 )
