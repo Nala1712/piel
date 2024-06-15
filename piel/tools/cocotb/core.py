@@ -14,7 +14,7 @@ import functools
 import pathlib
 import subprocess
 from piel.file_system import return_path, write_file, delete_path_list_in_directory
-from piel.types.tools.cocotb import CocoTBSimulator, CocoTBTopLevelLanguage
+from piel.types.flows.digital import HDLSimulator, HDLTopLevelLanguage
 
 __all__ = [
     "check_cocotb_testbench_exists",
@@ -57,8 +57,8 @@ def check_cocotb_testbench_exists(
 
 def configure_cocotb_simulation(
     design_directory: str | pathlib.Path,
-    simulator: CocoTBSimulator,
-    top_level_language: CocoTBTopLevelLanguage,
+    simulator: HDLSimulator,
+    top_level_language: HDLTopLevelLanguage,
     top_level_verilog_module: str,
     test_python_module: str,
     design_sources_list: list | None = None,

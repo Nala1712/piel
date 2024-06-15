@@ -1,11 +1,11 @@
-from piel.types.tools.amaranth import AmaranthTruthTable
+from piel.types.flows.digital import TruthTableDictionary
 from ..file_system import return_path
 from ..types import PathTypes
 
 
 def create_cocotb_truth_table_verification_python_script(
     module: PathTypes,
-    truth_table: AmaranthTruthTable,
+    truth_table: TruthTableDictionary,
     test_python_module_name: str = "top_test",
 ):
     """
@@ -13,7 +13,7 @@ def create_cocotb_truth_table_verification_python_script(
 
     Args:
         module (PathTypes): The path to the module where the test script will be placed.
-        truth_table (AmaranthTruthTable): A dictionary representing the truth table.
+        truth_table (TruthTableDictionary): A dictionary representing the truth table.
         test_python_module_name (str, optional): The name of the test python module. Defaults to "top_test".
 
     Example:

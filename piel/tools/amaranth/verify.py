@@ -6,16 +6,16 @@ from typing import Literal
 from ...project_structure import get_module_folder_type_location
 from ...file_system import return_path
 from ...types import PathTypes
-from piel.types.tools.amaranth import AmaranthLogicSignals, AmaranthTruthTable
+from piel.types.flows.digital import LogicSignalsList, TruthTableDictionary
 
 __all__ = ["verify_truth_table"]
 
 
 def verify_truth_table(
     truth_table_amaranth_module: am.Elaboratable,
-    truth_table_dictionary: AmaranthTruthTable,
-    inputs: AmaranthLogicSignals,
-    outputs: AmaranthLogicSignals,
+    truth_table_dictionary: TruthTableDictionary,
+    inputs: LogicSignalsList,
+    outputs: LogicSignalsList,
     vcd_file_name: str,
     target_directory: PathTypes,
     implementation_type: Literal[

@@ -5,7 +5,7 @@ from ..tools.amaranth import (
     generate_verilog_from_amaranth,
     verify_truth_table,
 )
-from ..types import PathTypes, AmaranthTruthTable, AmaranthLogicSignals, CocoTBSimulator
+from ..types import PathTypes, TruthTableDictionary, LogicSignalsList, HDLSimulator
 from ..tools.cocotb import (
     configure_cocotb_simulation,
     run_cocotb_simulation,
@@ -15,10 +15,10 @@ from ..tools.cocotb import (
 
 
 def generate_verilog_and_verification_from_truth_table(
-    input_ports: AmaranthLogicSignals,
+    input_ports: LogicSignalsList,
     module: PathTypes,
-    output_ports: AmaranthLogicSignals,
-    truth_table: AmaranthTruthTable,
+    output_ports: LogicSignalsList,
+    truth_table: TruthTableDictionary,
     target_file_name: str = "truth_table_module",
 ):
     """
@@ -97,7 +97,7 @@ def run_verification_simulation_for_design(
     module: PathTypes,
     top_level_verilog_module: str,
     test_python_module: str,
-    simulator: CocoTBSimulator = "icarus",
+    simulator: HDLSimulator = "icarus",
 ):
     """
     Configures and runs a Cocotb simulation for a given design module and retrieves the simulation data.
@@ -111,7 +111,7 @@ def run_verification_simulation_for_design(
                                         Example: "full_flow_demo_module"
     - test_python_module (str): The name of the Python test module for the design.
                                 Example: "test_full_flow_demo"
-    - simulator (CocoTBSimulator): The simulator to use for the Cocotb simulation. Default is "icarus".
+    - simulator (HDLSimulator): The simulator to use for the Cocotb simulation. Default is "icarus".
 
     Returns:
     - example_simulation_data: The simulation data read from the output files.

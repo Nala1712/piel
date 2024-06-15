@@ -145,7 +145,7 @@ def run_simulation(
             simulation_options = configure_ngspice_simulation()
         results = simulation.run(simulation_options)
     else:
-        print("CocoTBSimulator not supported.")
+        print("HDLSimulator not supported.")
         return
 
     if to_csv:

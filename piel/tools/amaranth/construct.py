@@ -1,14 +1,14 @@
 import amaranth as am
 from typing import Literal
-from piel.types.tools.amaranth import AmaranthTruthTable, AmaranthLogicSignals
+from piel.types.flows.digital import TruthTableDictionary, LogicSignalsList
 
 __all__ = ["construct_amaranth_module_from_truth_table"]
 
 
 def construct_amaranth_module_from_truth_table(
-    truth_table: AmaranthTruthTable,
-    inputs: AmaranthLogicSignals,
-    outputs: AmaranthLogicSignals,
+    truth_table: TruthTableDictionary,
+    inputs: LogicSignalsList,
+    outputs: LogicSignalsList,
     implementation_type: Literal[
         "combinatorial", "sequential", "memory"
     ] = "combinatorial",

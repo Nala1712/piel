@@ -136,23 +136,20 @@ target_implementation_optical_logic_table = raw_optical_transmission_table[
 ].copy()
 target_implementation_optical_logic_table
 
-# Now, each of these electronic phases applied correspond to a given digital value that we want to impelment on the electronic logic.
+# Now, each of these electronic phases applied correspond to a given digital value that we want to implement on the electronic logic.
 
 basic_ideal_phase_map = piel.models.logic.electro_optic.linear_bit_phase_map(
     bits_amount=5, final_phase_rad=np.pi, initial_phase_rad=0
 )
 basic_ideal_phase_map
 
-target_implementation_optical_logic_table[
-    "phase_bit"
-] = piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
+piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
     dataframe=target_implementation_optical_logic_table,
     phase_column_name="phase",
     phase_bit_dataframe=basic_ideal_phase_map,
     phase_series_name="phase",
     bit_series_name="bits",
 )
-target_implementation_optical_logic_table
 
 # +
 input_ports_list = ["input_fock_state"]
@@ -446,13 +443,21 @@ def compute_simulation_unitaries(
 
 # ## 3b. Digital Chip Implementation
 
+# +
+truth_table_module = piel.tools.amaranth.construct_amaranth_module_from_truth_table(
+    truth_table=target_truth_table,
+    inputs=input_ports_list,
+    outputs=output_ports_list,
+)
+
 layout_amaranth_truth_table_through_openlane(
-    amaranth_module=our_truth_table_module,
+    amaranth_module=truth_table_module,
     inputs_name_list=input_ports_list,
     outputs_name_list=output_ports_list,
-    parent_directory=amaranth_driven_flow,
+    parent_directory=full_flow_demo,
     openlane_version="v2",
 )
+# -
 
 # ## 4a. Driver-Amplfier Modelling
 

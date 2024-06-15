@@ -7,9 +7,13 @@ from .core import (
     QuantityType,
     TupleIntType,
 )
-from .tools.amaranth import AmaranthTruthTable, AmaranthLogicSignals
-from .tools.cocotb import CocoTBSimulator, CocoTBTopLevelLanguage
-from .tools.sax import PortsTuple, SParameterMatrixTuple
+from piel.types.flows.digital import (
+    TruthTableDictionary,
+    LogicSignalsList,
+    HDLSimulator,
+    HDLTopLevelLanguage,
+)
+from piel.types.flows.photonic import PortsTuple, SParameterMatrixTuple
 from .models.electrical import (
     CoaxialCableGeometryType,
     CoaxialCableHeatTransferType,

@@ -3,8 +3,8 @@ import pandas as pd
 from typing import Iterable, Optional, Callable
 from ..types import (
     PhaseMapType,
-    AmaranthLogicSignals,
-    AmaranthTruthTable,
+    LogicSignalsList,
+    TruthTableDictionary,
     convert_tuple_to_string,
 )
 
@@ -56,9 +56,9 @@ def convert_dataframe_to_bit_tuple(
 
 def convert_dataframe_to_truth_table_dictionary(
     truth_table_dataframe: pd.DataFrame,
-    input_ports: AmaranthLogicSignals,
-    output_ports: AmaranthLogicSignals,
-) -> AmaranthTruthTable:
+    input_ports: LogicSignalsList,
+    output_ports: LogicSignalsList,
+) -> TruthTableDictionary:
     """
     This function converts a dataframe into a truth table dictionary. The truth table dictionary is a dictionary
     where the keys are the port names and the values are the lists of binary strings representing the truth table entries.
