@@ -1,8 +1,8 @@
-import pandas as pd
-from typing import Literal
+from typing import Literal, Iterable
 from .core import PielBaseModel
 
-BitType = str | bytes | int
+BitsType = str | bytes | int
+BitsList = Iterable[BitsType]
 HDLSimulator = Literal["icarus", "verilator"]
 HDLTopLevelLanguage = Literal["verilog", "vhdl"]
 

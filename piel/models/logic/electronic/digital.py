@@ -1,11 +1,11 @@
 import numpy as np
-from ....types import BitFormatType
+from ....types import BitsList, BitsType
 
 
 def bits_array_from_bits_amount(
     bits_amount: int,
-    bit_format: BitFormatType = "int",
-) -> np.ndarray:
+    bit_format: BitsType = "int",
+) -> BitsList:
     """
     Returns an array of bits from a given amount of bits.
 

@@ -144,9 +144,9 @@ basic_ideal_phase_map = piel.models.logic.electro_optic.linear_bit_phase_map(
 basic_ideal_phase_map.dataframe
 
 piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
-    dataframe=target_implementation_optical_logic_table,
+    truth_table=target_implementation_optical_logic_table,
     phase_column_name="phase",
-    phase_bit_dataframe=basic_ideal_phase_map,
+    bit_phase_map=basic_ideal_phase_map,
 )
 
 # +

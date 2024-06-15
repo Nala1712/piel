@@ -8,11 +8,13 @@ from .core import (
     TupleIntType,
 )
 from .digital import (
-    TruthTable,
-    TruthTable,
-    LogicSignalsList,
+    BitsType,
+    BitsList,
     HDLSimulator,
     HDLTopLevelLanguage,
+    LogicSignalsList,
+    TruthTable,
+    TruthTable,
 )
 from .digital_electro_optic import BitPhaseMap, BitPhaseMap
 
@@ -25,7 +27,7 @@ from .electrical import (
     DCCableMaterialSpecificationType,
 )
 from .electro_optic import FockStatePhaseTransitionType, PhaseTransitionTypes
-from .electronic import BitFormatType, HVAMetricsType, LNAMetricsType
+from .electronic import HVAMetricsType, LNAMetricsType
 from .photonic import (
     PhotonicCircuitComponent,
     PortsTuple,

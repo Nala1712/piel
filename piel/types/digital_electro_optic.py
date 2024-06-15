@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Iterable
 from .core import NumericalTypes, PielBaseModel
-from .digital import BitType
+from .digital import BitsType
 
 
 class BitPhaseMap(PielBaseModel):
@@ -9,7 +9,7 @@ class BitPhaseMap(PielBaseModel):
     This is a mapping of bits to phase.
     """
 
-    bits: Iterable[BitType]
+    bits: Iterable[BitsType]
     """
     Iterable of bits.
     """

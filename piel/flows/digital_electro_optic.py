@@ -32,7 +32,8 @@ def convert_dataframe_to_bit_tuple(
         tuple: A tuple of bits that correspond to the phase column of the dataframe.
     """
     # TODO interim pydantic-dataframe migration
-    bit_phase_map = bit_phase_map.dataframe
+    truth_table = truth_table.dataframe
+    bit_phase_map = bit_phase_map
 
     bit_list = []
     # Iterate through the dataframe's phase tuples column

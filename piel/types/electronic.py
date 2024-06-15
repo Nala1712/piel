@@ -1,7 +1,6 @@
 from piel.types import PielBaseModel
-from typing import Optional, Literal
+from typing import Optional
 
-BitFormatType = Literal["int", "str"]
 MinimumMaximumType = tuple([Optional[float], Optional[float]])
 
 

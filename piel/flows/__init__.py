@@ -3,7 +3,6 @@ from .digital_logic import (
     run_verification_simulation_for_design,
 )
 from .digital_electro_optic import (
-    convert_dataframe_to_truth_table_dictionary,
     convert_dataframe_to_bit_tuple,
     convert_phase_array_to_bit_array,
     find_nearest_bit_for_phase,
