@@ -22,6 +22,10 @@ PackageArrayType = Literal["qutip", "jax", "numpy", "list", "tuple"] | TupleIntT
 class PielBaseModel(pydantic.BaseModel):
     class Config:
         arbitrary_types_allowed = True
+        extra = "forbid"
+        validate_assignment = True
+        strict = True
+        allow_mutation = False
 
     def supplied_parameters(self):
         # This method returns a list of parameter names that have been supplied (i.e., are not None)
