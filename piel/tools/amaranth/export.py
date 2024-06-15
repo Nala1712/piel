@@ -4,15 +4,14 @@ import types
 
 from ...project_structure import get_module_folder_type_location
 from ...file_system import return_path
-from piel.types.digital import LogicSignalsList
+from piel.types.digital import TruthTable
 from ...types import PathTypes
 
 __all__ = ["generate_verilog_from_amaranth"]
 
-
 def generate_verilog_from_amaranth(
     amaranth_module: am.Elaboratable,
-    ports_list: LogicSignalsList,
+    truth_table: TruthTable,
     target_file_name: str,
     target_directory: PathTypes,
     backend=verilog,
@@ -25,7 +24,7 @@ def generate_verilog_from_amaranth(
 
     Args:
         amaranth_module (amaranth.Elaboratable): Amaranth elaboratable class.
-        ports_list (list[str]): List of input names.
+        truth_table (TruthTable): Truth table containing the input and output ports.
         target_file_name (str): Target file name.
         target_directory (PathTypes): Target directory PATH.
         backend (amaranth.back.verilog): Backend to use. Defaults to ``verilog``.
@@ -33,6 +32,8 @@ def generate_verilog_from_amaranth(
     Returns:
         None
     """
+    ports_list = truth_table.ports_list
+
     if isinstance(target_directory, types.ModuleType):
         # If the path follows the structure of a `piel` path.
         target_directory = get_module_folder_type_location(
@@ -44,12 +45,18 @@ def generate_verilog_from_amaranth(
     target_file_path = target_directory / target_file_name
 
     # Iterate over ports list and construct a list of references for the strings provided in `ports_list`
-    # TODO maybe compose this as a separate function.
-    module_ports_list = list()
+    module_ports_list = []
     for port_i in ports_list:
-        module_port_i = getattr(amaranth_module, port_i)
-        module_ports_list.append(module_port_i)
+        if hasattr(amaranth_module, port_i):
+            module_port_i = getattr(amaranth_module, port_i)
+            module_ports_list.append(module_port_i)
+        else:
+            raise AttributeError(f"Port {port_i} not found in the Amaranth module.")
 
+    # Ensure the directory exists
+    target_directory.mkdir(parents=True, exist_ok=True)
+
+    # Write the Verilog file to the target path
     with open(target_file_path, "w") as file:
         file.write(
             backend.convert(
@@ -57,3 +64,5 @@ def generate_verilog_from_amaranth(
                 ports=module_ports_list,
             )
         )
+
+    print(f"Verilog file generated and written to {target_file_path}")

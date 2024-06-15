@@ -151,7 +151,11 @@ truth_table = piel.flows.digital_electro_optic.convert_optical_transitions_to_tr
 )
 truth_table.dataframe
 
+truth_table.input_ports
+
 truth_table.output_ports
+
+truth_table.implementation_dictionary
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
 
@@ -163,7 +167,7 @@ truth_table.output_ports
 # Define all the relevant ports from the dictionary
 
 piel.flows.generate_verilog_and_verification_from_truth_table(
-    truth_table=target_truth_table,
+    truth_table=truth_table,
     module=full_flow_demo,
 )
 
@@ -191,7 +195,7 @@ piel.flows.generate_verilog_and_verification_from_truth_table(
 
 piel.integration.create_cocotb_truth_table_verification_python_script(
     module=full_flow_demo,
-    truth_table=target_truth_table,
+    truth_table=truth_table,
     test_python_module_name="test_top",
 )
 

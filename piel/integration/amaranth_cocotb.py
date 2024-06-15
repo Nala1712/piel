@@ -24,11 +24,20 @@ def create_cocotb_truth_table_verification_python_script(
         }
         create_cocotb_truth_table_verification_python_script(truth_table)
     """
+    # Extract input and output ports
+    input_ports = truth_table.input_ports
+    output_ports = truth_table.output_ports
+
+    # Get the implementation dictionary with only the specified ports
+    truth_table_dict = truth_table.implementation_dictionary
+
     # Resolve the module path and create the tb directory if it doesn't exist
     module_path = return_path(module)
     tb_directory_path = module_path / "tb"
+    tb_directory_path.mkdir(parents=True, exist_ok=True)
     python_module_test_file_path = tb_directory_path / f"{test_python_module_name}.py"
     output_file = tb_directory_path / "out" / "truth_table_test_results.csv"
+    output_file.parent.mkdir(parents=True, exist_ok=True)  # Ensure 'out' directory exists
 
     # Create the header for the script
     script_content = """
@@ -45,8 +54,8 @@ async def truth_table_test(dut):
 
 """
     # Extract signal names and values from the truth table
-    signals = list(truth_table.keys())
-    num_tests = len(truth_table[signals[0]])
+    signals = list(truth_table_dict.keys())
+    num_tests = len(truth_table_dict[signals[0]])
 
     # Initialize lists to store signal data for logging
     for signal in signals:
@@ -57,21 +66,19 @@ async def truth_table_test(dut):
     # Loop over each row in the truth table to generate test cases
     for i in range(num_tests):
         script_content += f"    # Test case {i + 1}\n"
-        for signal in signals[:-1]:  # All but the last signal are inputs
-            value = truth_table[signal][i]
+        for signal in input_ports:  # Input ports are the inputs to the DUT
+            value = truth_table_dict[signal][i]
             script_content += f'    dut.{signal}.value = cocotb.binary.BinaryValue("{value}")\n'  # Assign binary string values directly
 
         script_content += "    await Timer(2, units='ns')\n\n"
 
-        expected_output = truth_table[signals[-1]][
-            i
-        ]  # The last signal is the expected output
-        output_signal = signals[-1]
+        # Check the expected output for each output port
+        for output_signal in output_ports:
+            expected_value = truth_table_dict[output_signal][i]
+            script_content += f'    assert dut.{output_signal}.value == cocotb.binary.BinaryValue("{expected_value}"), '
+            script_content += f'f"Test failed for inputs {input_ports}: expected {expected_value} but got {{dut.{output_signal}.value}}."\n'
 
-        # Add assertion and logging
-        script_content += f'    assert dut.{output_signal}.value == cocotb.binary.BinaryValue("{expected_output}"), '  # CURRENT TODO FIX THIS
-        script_content += f'f"Test failed for inputs {signals[:-1]}: expected {expected_output} but got {{dut.{output_signal}.value}}."\n'
-
+        # Append data to lists for logging
         for signal in signals:
             script_content += f"    {signal.lower()}_data.append(dut.{signal}.value)\n"
 

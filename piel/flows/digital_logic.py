@@ -48,8 +48,8 @@ def generate_verilog_and_verification_from_truth_table(
     """
     # TODO interim migration
     ports_list = truth_table.ports_list
-    input_ports = truth_table.input_ports
-    output_ports = truth_table.output_ports
+    input_ports = truth_table.input_ports.copy()
+    output_ports = truth_table.output_ports.copy()
 
 
     # Combine input and output ports into a single list for ports
@@ -68,7 +68,7 @@ def generate_verilog_and_verification_from_truth_table(
     # Generate Verilog file from the Amaranth module
     generate_verilog_from_amaranth(
         amaranth_module=amaranth_module,
-        ports_list=ports_list,
+        truth_table=truth_table,
         target_file_name=f"{target_file_name}.v",
         target_directory=src_folder,
     )
@@ -77,8 +77,6 @@ def generate_verilog_and_verification_from_truth_table(
     verify_truth_table(
         truth_table_amaranth_module=amaranth_module,
         truth_table=truth_table,
-        inputs=input_ports,
-        outputs=output_ports,
         vcd_file_name=f"{target_file_name}.vcd",
         target_directory=module,
     )

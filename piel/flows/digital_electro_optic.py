@@ -75,13 +75,14 @@ def convert_optical_transitions_to_truth_table(
         truth_table_raw[f"{port_i}_str"] = truth_table_raw[f"{port_i}_str"].apply(
             lambda x: "".join(str(x))
         )
+        truth_table_raw[f"{port_i}_str"] = truth_table_raw[f"{port_i}_str"].values.tolist()
 
 
 
     for phase_iterable_id_i in range(phase_bit_array_length):
         # Initialise lists
         truth_table_raw[f"bit_phase_{phase_iterable_id_i}"] = list()
-        output_ports_list += f"bit_phase_{phase_iterable_id_i}"
+        output_ports_list.append(f"bit_phase_{phase_iterable_id_i}")
 
     for transition_id_i in range(len(transitions_dataframe)):
 

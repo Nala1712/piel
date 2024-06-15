@@ -4,7 +4,6 @@ from piel.types.digital import TruthTable, LogicSignalsList
 
 __all__ = ["construct_amaranth_module_from_truth_table"]
 
-
 def construct_amaranth_module_from_truth_table(
     truth_table: TruthTable,
     implementation_type: Literal[
@@ -23,53 +22,57 @@ def construct_amaranth_module_from_truth_table(
         }
 
     Args:
-        truth_table (dict): The truth table in the form of a dictionary.
+        truth_table (TruthTable): The truth table in the form of a TruthTable object.
         implementation_type (Literal["combinatorial", "sequential", "memory"], optional): The type of implementation. Defaults to "combinatorial".
 
     Returns:
         Generated amaranth module.
     """
 
-    # TODO interim migration
+    # Extract inputs and outputs from the truth table
     inputs = truth_table.input_ports
     outputs = truth_table.output_ports
-    truth_table = truth_table.dict()
+    truth_table_dict = truth_table.implementation_dictionary
 
-    class TruthTable(am.Elaboratable):
+    class TruthTableModule(am.Elaboratable):
         def __init__(self, truth_table: dict, inputs: list, outputs: list):
-            super(TruthTable, self).__init__()
-            # Raise error if no truth table inputs are provided:
+            super(TruthTableModule, self).__init__()
+
+            # Ensure that the truth table has entries
             if len(truth_table[inputs[0]]) == 0:
                 raise ValueError("No truth table inputs provided." + str(inputs))
 
-            # Initialise all the signals accordingly.
-            for key, value in truth_table.items():
-                # TODO Determine signal type or largest width from the values.
-                max_length = max((len(s) for s in value), default=0)
-                setattr(self, key, am.Signal(shape=max_length, name=key))
+            # Initialize signals for input and output ports and assign them as attributes
+            self.input_signal = am.Signal(len(truth_table[inputs[0]][0]), name=inputs[0])
+            self.output_signals = {output: am.Signal(len(truth_table[output][0]), name=output) for output in outputs}
+
+            # Assign input and output signals as class attributes for external access
+            setattr(self, inputs[0], self.input_signal)
+            for output in outputs:
+                setattr(self, output, self.output_signals[output])
 
             self.inputs_names = inputs
             self.outputs_names = outputs
+            self.truth_table = truth_table
 
         def elaborate(self, platform):
             m = am.Module()
-            # We need to iterate over the length of the truth table arrays for the input and output keys.
-            # TODO implement multiinput.
-            # TODO implement some verification that the arrays are of the same length.
 
-            # Implements a particular output.
-            output_signal_value_i = getattr(self, outputs[0]).eq
+            # Assume the truth table entries are consistent and iterate over them
+            with m.Switch(self.input_signal):
+                for i in range(len(self.truth_table[self.inputs_names[0]])):
+                    input_case = str(self.truth_table[self.inputs_names[0]][i])
+                    with m.Case(input_case):
+                        # Assign values to each output signal for the current case
+                        for output in self.outputs_names:
+                            output_signal_value = self.output_signals[output].eq
+                            m.d.comb += output_signal_value(int(self.truth_table[output][i], 2))
 
-            with m.Switch(getattr(self, inputs[0])):
-                for i in range(len(truth_table[self.inputs_names[0]])):
-                    # We iterate over the truth table values
-                    with m.Case(str(truth_table[self.inputs_names[0]][i])):
-                        m.d.comb += output_signal_value_i(
-                            int(truth_table[self.outputs_names[0]][i], 2)
-                        )
+                # Default case: set all outputs to 0
                 with m.Case():
-                    m.d.comb += output_signal_value_i(0)
+                    for output in self.outputs_names:
+                        m.d.comb += self.output_signals[output].eq(0)
 
             return m
 
-    return TruthTable(truth_table, inputs, outputs)
+    return TruthTableModule(truth_table_dict, inputs, outputs)
