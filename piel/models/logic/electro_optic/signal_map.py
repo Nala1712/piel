@@ -21,8 +21,9 @@ bit-size can map directly to a particular phase space within a particular mappin
 import numpy as np
 import pandas as pd
 from typing import Literal
+
 from ..electronic.digital import bits_array_from_bits_amount
-from ....types import PhaseMapType
+from piel.types.digital_electro_optic import PhaseBitDataFrame
 
 
 def linear_bit_phase_map(
@@ -32,7 +33,7 @@ def linear_bit_phase_map(
     return_dataframe: bool = True,
     quantization_error: float = 0.000001,
     bit_format: Literal["int", "str"] = "int",
-) -> PhaseMapType:
+) -> PhaseBitDataFrame:
     """
     Returns a linear direct mapping of bits to phase.
 
@@ -62,8 +63,7 @@ def linear_bit_phase_map(
         "bits": bits_array,
         "phase": linear_phase_array,
     }
-    if return_dataframe:
-        bit_phase_mapping = pd.DataFrame(bit_phase_mapping_raw)
-    else:
-        bit_phase_mapping = bit_phase_mapping_raw
+    # TODO eventually migrate this to pure dict operations
+    bit_phase_mapping = pd.DataFrame(bit_phase_mapping_raw)
+    bit_phase_mapping = PhaseBitDataFrame(bit_phase_mapping)
     return bit_phase_mapping
