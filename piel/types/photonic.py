@@ -8,3 +8,4 @@ SParameterMatrixTuple = tuple[ArrayTypes, PortsTuple]
 OpticalTransmissionCircuit = sax.saxtypes.Callable
 RecursiveNetlist = sax.RecursiveNetlist
 PhotonicCircuitComponent = gf.Component
+

@@ -14,6 +14,7 @@ from typing import Optional, Literal
 
 PathTypes = str | pathlib.Path | os.PathLike | types.ModuleType
 ArrayTypes = np.ndarray | jnp.ndarray
+TupleFloatType = tuple[float, ...]
 TupleIntType = tuple[int, ...]
 NumericalTypes = int | float | np.dtype | jnp.dtype
 PackageArrayType = Literal["qutip", "jax", "numpy", "list", "tuple"] | TupleIntType

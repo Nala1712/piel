@@ -1,12 +1,19 @@
-from typing import Literal
+from typing import Literal, Optional
+from typing_extensions import TypedDict
 import pandas as pd
-from .core import TupleIntType
+from pydantic import ConfigDict
+from .core import TupleIntType, TupleFloatType, PielBaseModel
 
-FockStatePhaseTransitionType = {
-    "phase": TupleIntType,
-    "input_fock_state": TupleIntType,
-    "output_fock_state": TupleIntType,
-}
+PhaseMapType = TupleFloatType | TupleIntType
+
+class FockStatePhaseTransitionType(TypedDict):
+
+    phase: PhaseMapType
+    input_fock_state: TupleIntType
+    output_fock_state: TupleIntType
+    target_mode_output: Optional[bool | int]
+
+
 """
 This is the standard format of a corresponding output state for a given input state in the electro-optic model:
 
@@ -19,3 +26,23 @@ output_state_0 = {
 
 
 PhaseTransitionTypes = Literal["cross", "bar"]
+
+
+class OpticalStateTransitions(PielBaseModel):
+
+    model_config = ConfigDict(extra="allow")
+
+    mode_amount: int
+    target_mode_index: int
+    transmission_data: list[FockStatePhaseTransitionType]
+
+    @property
+    def transition_dataframe(self):
+        return pd.DataFrame(self.transmission_data)
+
+    @property
+    def target_output_dataframe(self):
+        # TODO add verification eventually
+        return self.transition_dataframe[
+            self.transition_dataframe["target_mode_output"] == 1
+        ]

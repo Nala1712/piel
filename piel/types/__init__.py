@@ -26,7 +26,7 @@ from .electrical import (
     DCCableHeatTransferType,
     DCCableMaterialSpecificationType,
 )
-from .electro_optic import FockStatePhaseTransitionType, PhaseTransitionTypes
+from .electro_optic import FockStatePhaseTransitionType, PhaseTransitionTypes, OpticalStateTransitions, PhaseMapType
 from .electronic import HVAMetricsType, LNAMetricsType
 from .photonic import (
     PhotonicCircuitComponent,

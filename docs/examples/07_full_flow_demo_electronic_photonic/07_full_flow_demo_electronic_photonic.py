@@ -119,50 +119,39 @@ optical_logic_verification_models[
 
 # Now, we need to compute our transmission information accordingly for a given set of optical inputs:
 
-chain_fock_state_transmission_list = piel.flows.get_state_phase_transitions(
+chain_fock_state_transitions = piel.flows.get_state_phase_transitions(
     circuit_component=chain_3_mode_lattice_circuit,
     models=optical_logic_verification_models,
     mode_amount=3,
     target_mode_index=2,
 )
-raw_optical_transmission_table = pd.DataFrame(chain_fock_state_transmission_list)
+# raw_optical_transmission_table = pd.DataFrame(chain_fock_state_transmission_list)
+chain_fock_state_transitions.transition_dataframe
+
+chain_fock_state_transitions.transmission_data[0].keys()
 
 # Now, we actually need to get the required electronic logic we want to implement, and map it back to a given binary implementation, into a corresponding truth table accordingly.
 #
 # Let's start by extracting our desired optical logic implementation:
 
-target_implementation_optical_logic_table = raw_optical_transmission_table[
-    raw_optical_transmission_table["target_mode_output"] == 1
-].copy()
-target_implementation_optical_logic_table
+chain_fock_state_transitions.target_output_dataframe
 
 # Now, each of these electronic phases applied correspond to a given digital value that we want to implement on the electronic logic.
+
+
 
 basic_ideal_phase_map = piel.models.logic.electro_optic.linear_bit_phase_map(
     bits_amount=5, final_phase_rad=np.pi, initial_phase_rad=0
 )
 basic_ideal_phase_map.dataframe
 
-piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
-    truth_table=target_implementation_optical_logic_table,
-    phase_column_name="phase",
+truth_table = piel.flows.digital_electro_optic.convert_optical_transitions_to_truth_table(
+    optical_state_transitions=chain_fock_state_transitions,
     bit_phase_map=basic_ideal_phase_map,
 )
+truth_table.dataframe
 
-# +
-input_ports_list = ["input_fock_state"]
-output_ports_list = ["phase_bit"]
-
-
-target_truth_table = (
-    piel.flows.digital_electro_optic.convert_dataframe_to_truth_table_dictionary(
-        truth_table=target_implementation_optical_logic_table,
-        input_ports=input_ports_list,
-        output_ports=output_ports_list,
-    )
-)
-target_truth_table
-# -
+truth_table.output_ports
 
 # ## 3. Synthesizing the logic, digtial testing and layout implementation
 
@@ -175,8 +164,6 @@ target_truth_table
 
 piel.flows.generate_verilog_and_verification_from_truth_table(
     truth_table=target_truth_table,
-    input_ports=input_ports_list,
-    output_ports=output_ports_list,
     module=full_flow_demo,
 )
 

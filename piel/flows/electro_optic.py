@@ -12,6 +12,7 @@ from ..types import (
     NumericalTypes,
     PhaseTransitionTypes,
     OpticalTransmissionCircuit,
+    OpticalStateTransitions,
     TupleIntType,
 )
 from ..tools.sax.netlist import (
@@ -461,7 +462,7 @@ def get_state_phase_transitions(
     target_mode_index: Optional[int] = None,
     determine_ideal_mode_function: Optional[Callable] = None,
     **kwargs,
-) -> list[FockStatePhaseTransitionType]:
+) -> OpticalStateTransitions:
     """
     The goal of this function is to extract the corresponding phase required to implement a state transition.
 
@@ -543,7 +544,13 @@ def get_state_phase_transitions(
             output_states.append(output_state_i)
         id_i += 1
 
-    return output_states
+    output_optical_state_transitions = OpticalStateTransitions(
+        mode_amount=mode_amount,
+        target_mode_index=target_mode_index,
+        transmission_data=output_states,
+    )
+
+    return output_optical_state_transitions
 
 
 def get_state_to_phase_map(

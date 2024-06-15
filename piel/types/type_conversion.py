@@ -8,7 +8,8 @@ import qutip
 from .core import ArrayTypes, PackageArrayType, TupleIntType
 
 
-def convert_array_type(array: ArrayTypes, output_type: PackageArrayType):
+def convert_array_type(array: ArrayTypes,
+                       output_type: PackageArrayType):
     if output_type == "qutip":
         if type(array) is qutip.Qobj:
             pass

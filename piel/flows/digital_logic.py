@@ -46,8 +46,14 @@ def generate_verilog_and_verification_from_truth_table(
     4. Generates a Verilog file from the Amaranth module.
     5. Creates a testbench to verify the generated module logic and produces a VCD file.
     """
+    # TODO interim migration
+    ports_list = truth_table.ports_list
+    input_ports = truth_table.input_ports
+    output_ports = truth_table.output_ports
+
 
     # Combine input and output ports into a single list for ports
+
 
     # Construct Amaranth module from the truth table
     amaranth_module = construct_amaranth_module_from_truth_table(
