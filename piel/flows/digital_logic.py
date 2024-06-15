@@ -5,7 +5,7 @@ from ..tools.amaranth import (
     generate_verilog_from_amaranth,
     verify_truth_table,
 )
-from ..types import PathTypes, TruthTableDictionary, LogicSignalsList, HDLSimulator
+from ..types import PathTypes, TruthTable, LogicSignalsList, HDLSimulator
 from ..tools.cocotb import (
     configure_cocotb_simulation,
     run_cocotb_simulation,
@@ -15,10 +15,8 @@ from ..tools.cocotb import (
 
 
 def generate_verilog_and_verification_from_truth_table(
-    input_ports: LogicSignalsList,
     module: PathTypes,
-    output_ports: LogicSignalsList,
-    truth_table: TruthTableDictionary,
+    truth_table: TruthTable,
     target_file_name: str = "truth_table_module",
 ):
     """
@@ -47,26 +45,13 @@ def generate_verilog_and_verification_from_truth_table(
     3. Determines the appropriate directory and source folder for the design.
     4. Generates a Verilog file from the Amaranth module.
     5. Creates a testbench to verify the generated module logic and produces a VCD file.
-
-    Example:
-    >>> detector_phase_truth_table = {
-    >>>     "detector_in": ["00", "01", "10", "11"],
-    >>>     "phase_map_out": ["00", "10", "11", "11"]
-    >>> }
-    >>> input_ports_list = ["detector_in"]
-    >>> output_ports_list = ["phase_map_out"]
-    >>> full_flow_demo = "full_flow_demo_module"
-    >>> generate_verilog_and_verification_from_truth_table(detector_phase_truth_table,input_ports_list,output_ports_list,full_flow_demo)
     """
 
     # Combine input and output ports into a single list for ports
-    ports_list = input_ports + output_ports
 
     # Construct Amaranth module from the truth table
     amaranth_module = construct_amaranth_module_from_truth_table(
         truth_table=truth_table,
-        inputs=input_ports,
-        outputs=output_ports,
     )
 
     # Determine the design directory
@@ -85,7 +70,7 @@ def generate_verilog_and_verification_from_truth_table(
     # Create a testbench to verify the logic and generate a VCD file
     verify_truth_table(
         truth_table_amaranth_module=amaranth_module,
-        truth_table_dictionary=truth_table,
+        truth_table=truth_table,
         inputs=input_ports,
         outputs=output_ports,
         vcd_file_name=f"{target_file_name}.vcd",

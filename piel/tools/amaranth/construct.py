@@ -1,14 +1,12 @@
 import amaranth as am
 from typing import Literal
-from piel.types.digital import TruthTableDictionary, LogicSignalsList
+from piel.types.digital import TruthTable, LogicSignalsList
 
 __all__ = ["construct_amaranth_module_from_truth_table"]
 
 
 def construct_amaranth_module_from_truth_table(
-    truth_table: TruthTableDictionary,
-    inputs: LogicSignalsList,
-    outputs: LogicSignalsList,
+    truth_table: TruthTable,
     implementation_type: Literal[
         "combinatorial", "sequential", "memory"
     ] = "combinatorial",
@@ -26,13 +24,16 @@ def construct_amaranth_module_from_truth_table(
 
     Args:
         truth_table (dict): The truth table in the form of a dictionary.
-        inputs (list[str]): The inputs to the truth table.
-        outputs (list[str]): The outputs to the truth table.
         implementation_type (Literal["combinatorial", "sequential", "memory"], optional): The type of implementation. Defaults to "combinatorial".
 
     Returns:
         Generated amaranth module.
     """
+
+    # TODO interim migration
+    inputs = truth_table.input_ports
+    outputs = truth_table.output_ports
+    truth_table = truth_table.dict()
 
     class TruthTable(am.Elaboratable):
         def __init__(self, truth_table: dict, inputs: list, outputs: list):

@@ -110,7 +110,7 @@ generate_verilog_from_amaranth(
 
 verify_truth_table(
     truth_table_amaranth_module=our_truth_table_module,
-    truth_table_dictionary=detector_phase_truth_table,
+    truth_table=detector_phase_truth_table,
     inputs=input_ports_list,
     outputs=output_ports_list,
     vcd_file_name="our_truth_table_module.vcd",
@@ -121,7 +121,7 @@ verify_truth_table(
 
 verify_truth_table(
     truth_table_amaranth_module=our_truth_table_module,
-    truth_table_dictionary=detector_phase_truth_table,
+    truth_table=detector_phase_truth_table,
     inputs=input_ports_list,
     outputs=output_ports_list,
     vcd_file_name="our_truth_table_module.vcd",

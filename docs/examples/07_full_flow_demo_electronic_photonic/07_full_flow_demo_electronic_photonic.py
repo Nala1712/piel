@@ -156,7 +156,7 @@ output_ports_list = ["phase_bit"]
 
 target_truth_table = (
     piel.flows.digital_electro_optic.convert_dataframe_to_truth_table_dictionary(
-        truth_table_dataframe=target_implementation_optical_logic_table,
+        truth_table=target_implementation_optical_logic_table,
         input_ports=input_ports_list,
         output_ports=output_ports_list,
     )

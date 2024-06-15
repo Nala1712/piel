@@ -8,8 +8,8 @@ from .core import (
     TupleIntType,
 )
 from .digital import (
-    TruthTableDataFrame,
-    TruthTableDictionary,
+    TruthTable,
+    TruthTable,
     LogicSignalsList,
     HDLSimulator,
     HDLTopLevelLanguage,

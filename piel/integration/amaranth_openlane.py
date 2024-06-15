@@ -16,20 +16,23 @@ from ..tools.openlane.defaults import (
     test_basic_open_lane_configuration_v1,
     test_basic_open_lane_configuration_v2,
 )
-from ..types import PathTypes
+from ..types import PathTypes, TruthTable
 
 __all__ = ["layout_amaranth_truth_table_through_openlane"]
 
 
 def layout_openlane_from_truth_table(
-    truth_table: dict,
-    inputs: list[str],
-    outputs: list[str],
+    truth_table: TruthTable,
     parent_directory: PathTypes,
     target_directory_name: Optional[str] = None,
     openlane_version: Literal["v1", "v2"] = "v2",
     **kwargs
 ):
+    # TODO interim migration
+    inputs = truth_table.input_ports
+    outputs = truth_table.output_ports
+    truth_table = truth_table.dict()
+
     our_truth_table_module = construct_amaranth_module_from_truth_table(
         truth_table=truth_table, inputs=inputs, outputs=outputs, **kwargs
     )

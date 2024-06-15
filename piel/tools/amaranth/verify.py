@@ -6,28 +6,30 @@ from typing import Literal
 from ...project_structure import get_module_folder_type_location
 from ...file_system import return_path
 from ...types import PathTypes
-from piel.types.digital import LogicSignalsList, TruthTableDictionary
+from piel.types.digital import TruthTable
 
 __all__ = ["verify_truth_table"]
 
 
 def verify_truth_table(
     truth_table_amaranth_module: am.Elaboratable,
-    truth_table_dictionary: TruthTableDictionary,
-    inputs: LogicSignalsList,
-    outputs: LogicSignalsList,
+    truth_table: TruthTable,
     vcd_file_name: str,
     target_directory: PathTypes,
     implementation_type: Literal[
         "combinatorial", "sequential", "memory"
     ] = "combinatorial",
 ):
-    """construct_amaranth_module_from_truth_table
+    """
     We will implement a function that tests the module to verify that the outputs generates match the truth table provided.
 
     TODO Implement a similar function from the openlane netlist too.
     TODO unclear they can implement verification without it being in a synchronous simulation.
     """
+    # TODO interim migration
+    inputs = truth_table.input_ports
+    outputs = truth_table.output_ports
+    truth_table = truth_table.dataframe
 
     def verify_logic():
         """
@@ -36,7 +38,7 @@ def verify_truth_table(
         input_port_signal = getattr(truth_table_amaranth_module, inputs[0]).eq
         output_port_signal = getattr(truth_table_amaranth_module, outputs[0])
         i = 0
-        for input_value_i in truth_table_dictionary[inputs[0]]:
+        for input_value_i in truth_table[inputs[0]]:
             # Iterate over the input value array and test every specific array.
             # Test against the output signal value in each clock cycle.
             yield input_port_signal(int(input_value_i))

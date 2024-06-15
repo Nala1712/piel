@@ -3,16 +3,13 @@ import pandas as pd
 from typing import Iterable, Optional, Callable
 from ..types import (
     BitPhaseMap,
-    BitPhaseMap,
-    LogicSignalsList,
-    TruthTableDictionary,
-    TruthTableDataFrame,
+    TruthTable,
     convert_tuple_to_string,
 )
 
 
 def convert_dataframe_to_bit_tuple(
-    truth_table_dataframe: TruthTableDataFrame,
+    truth_table: TruthTable,
     phase_column_name: str,
     bit_phase_map: BitPhaseMap,
     rounding_function: Optional[Callable] = None,
@@ -25,7 +22,7 @@ def convert_dataframe_to_bit_tuple(
     a tuple of bits that correspond to the phase column of the dataframe.
 
     Args:
-        truth_table_dataframe (pd.DataFrame): The dataframe that contains the phase column.
+        truth_table (pd.DataFrame): The dataframe that contains the phase column.
         phase_column_name (str): The name of the phase column in the dataframe.
         bit_phase_map (BitPhaseMap): The dataframe that maps the phase to the bit.
         rounding_function (Optional[Callable]): The rounding function that is used to round the phase to the nearest
@@ -39,9 +36,11 @@ def convert_dataframe_to_bit_tuple(
 
     bit_list = []
     # Iterate through the dataframe's phase tuples column
-    for phase_tuple in truth_table_dataframe[phase_column_name]:
+    for phase_tuple in truth_table[phase_column_name]:
         # Convert the tuple of phases into bitstrings using convert_phase_array_to_bit_array
-        bits = convert_phase_array_to_bit_array(phase_tuple, bit_phase_map, rounding_function)
+        bits = convert_phase_array_to_bit_array(
+            phase_tuple, bit_phase_map, rounding_function
+        )
 
         # Add the bits to the final list
         bit_list.extend(tuple([bits]))
@@ -49,46 +48,46 @@ def convert_dataframe_to_bit_tuple(
     return tuple(bit_list)
 
 
-def convert_dataframe_to_truth_table_dictionary(
-    truth_table_dataframe: pd.DataFrame,
-    input_ports: LogicSignalsList,
-    output_ports: LogicSignalsList,
-) -> TruthTableDictionary:
-    """
-    This function converts a dataframe into a truth table dictionary. The truth table dictionary is a dictionary
-    where the keys are the port names and the values are the lists of binary strings representing the truth table entries.
-    The function ensures that the keys are present in the dataframe and converts the relevant columns to the required format.
-
-    Args:
-        truth_table_dataframe (pd.DataFrame): The dataframe that contains the truth table.
-        input_ports (List[str]): A list of the input port names in the dataframe.
-        output_ports (List[str]): A list of the output port names in the dataframe.
-
-    Returns:
-        Dict[str, List[str]]: The truth table dictionary.
-    """
-    # TODO clean up dirty code.
-
-    # Check if all input and output ports are in the dataframe
-    for port_i in input_ports + output_ports:
-        if port_i not in truth_table_dataframe.columns:
-            raise ValueError(f"Port {port_i} not found in dataframe columns.")
-
-        truth_table_dataframe[port_i] = truth_table_dataframe.loc[:, port_i].apply(
-            convert_tuple_to_string
-        )
-
-        truth_table_dataframe[port_i] = truth_table_dataframe[port_i].apply(
-            lambda x: "".join(x)
-        )
-
-    # Construct the dictionary with input and output ports
-    truth_table_dict = {
-        port_i: truth_table_dataframe[port_i].to_list()
-        for port_i in input_ports + output_ports
-    }
-
-    return truth_table_dict
+# def convert_dataframe_to_truth_table_dictionary(
+#     truth_table: TruthTable,
+# ) -> TruthTable:
+#     """
+#     This function converts a dataframe into a truth table dictionary. The truth table dictionary is a dictionary
+#     where the keys are the port names and the values are the lists of binary strings representing the truth table entries.
+#     The function ensures that the keys are present in the dataframe and converts the relevant columns to the required format.
+#
+#     Args:
+#         truth_table (pd.DataFrame): The dataframe that contains the truth table.
+#         input_ports (List[str]): A list of the input port names in the dataframe.
+#         output_ports (List[str]): A list of the output port names in the dataframe.
+#
+#     Returns:
+#         Dict[str, List[str]]: The truth table dictionary.
+#     """
+#     # TODO clean up dirty code.
+#     ports_list = TruthTable.ports_list
+#     truth_table = TruthTable.dataframe
+#
+#     # Check if all input and output ports are in the dataframe
+#     for port_i in ports_list:
+#         if port_i not in truth_table.columns:
+#             raise ValueError(f"Port {port_i} not found in dataframe columns.")
+#
+#         truth_table[port_i] = truth_table.loc[:, port_i].apply(
+#             convert_tuple_to_string
+#         )
+#
+#         truth_table[port_i] = truth_table[port_i].apply(
+#             lambda x: "".join(x)
+#         )
+#
+#     # Construct the dictionary with input and output ports
+#     truth_table_dict = {
+#         port_i: truth_table[port_i].to_list()
+#         for port_i in ports_list
+#     }
+#
+#     return truth_table_dict
 
 
 def convert_phase_array_to_bit_array(
@@ -124,13 +123,13 @@ def convert_phase_array_to_bit_array(
             phase = rounding_function(phase)
 
         # Check if phase is in the dataframe
-        matched_rows = bit_phase_map.loc[
-            bit_phase_map["phase"] == phase, "bits"
-        ]
+        matched_rows = bit_phase_map.loc[bit_phase_map["phase"] == phase, "bits"]
 
         # If exact phase is not found, use the nearest phase bit representation
         if matched_rows.empty:
-            bitstring, _ = find_nearest_bit_for_phase(phase, bit_phase_map, rounding_function)
+            bitstring, _ = find_nearest_bit_for_phase(
+                phase, bit_phase_map, rounding_function
+            )
         else:
             bitstring = matched_rows.iloc[0]
 
@@ -174,9 +173,9 @@ def find_nearest_bit_for_phase(
     ]  # TODO implement rounding function here.
 
     # Get the corresponding bitstring for the nearest phase
-    bitstring = bit_phase_map.loc[
-        bit_phase_map["phase"] == nearest_phase, "bits"
-    ].iloc[0]
+    bitstring = bit_phase_map.loc[bit_phase_map["phase"] == nearest_phase, "bits"].iloc[
+        0
+    ]
 
     return bitstring, nearest_phase
 
