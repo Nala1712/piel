@@ -14,7 +14,7 @@ from .digital import (
     HDLSimulator,
     HDLTopLevelLanguage,
 )
-from .digital_electro_optic import PhaseBitDataFrame, PhaseMapType
+from .digital_electro_optic import BitPhaseMap, BitPhaseMap
 
 from .electrical import (
     CoaxialCableGeometryType,

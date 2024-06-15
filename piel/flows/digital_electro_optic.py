@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import Iterable, Optional, Callable
 from ..types import (
-    PhaseMapType,
-    PhaseBitDataFrame,
+    BitPhaseMap,
+    BitPhaseMap,
     LogicSignalsList,
     TruthTableDictionary,
     TruthTableDataFrame,
@@ -14,7 +14,7 @@ from ..types import (
 def convert_dataframe_to_bit_tuple(
     truth_table_dataframe: TruthTableDataFrame,
     phase_column_name: str,
-    phase_bit_dataframe: PhaseBitDataFrame,
+    bit_phase_map: BitPhaseMap,
     rounding_function: Optional[Callable] = None,
 ) -> tuple:
     """
@@ -27,22 +27,21 @@ def convert_dataframe_to_bit_tuple(
     Args:
         truth_table_dataframe (pd.DataFrame): The dataframe that contains the phase column.
         phase_column_name (str): The name of the phase column in the dataframe.
-        phase_bit_dataframe (pd.DataFrame): The dataframe that maps the phase to the bit.
+        bit_phase_map (BitPhaseMap): The dataframe that maps the phase to the bit.
         rounding_function (Optional[Callable]): The rounding function that is used to round the phase to the nearest
             phase in the phase_bit_dataframe.
 
     Returns:
         tuple: A tuple of bits that correspond to the phase column of the dataframe.
     """
+    # TODO interim pydantic-dataframe migration
+    bit_phase_map = bit_phase_map.dataframe
+
     bit_list = []
     # Iterate through the dataframe's phase tuples column
     for phase_tuple in truth_table_dataframe[phase_column_name]:
         # Convert the tuple of phases into bitstrings using convert_phase_array_to_bit_array
-        bits = convert_phase_array_to_bit_array(
-            phase_tuple,
-            phase_bit_dataframe,
-            rounding_function,
-        )
+        bits = convert_phase_array_to_bit_array(phase_tuple, bit_phase_map, rounding_function)
 
         # Add the bits to the final list
         bit_list.extend(tuple([bits]))
@@ -94,7 +93,7 @@ def convert_dataframe_to_truth_table_dictionary(
 
 def convert_phase_array_to_bit_array(
     phase_array: Iterable,
-    phase_bit_dataframe: PhaseBitDataFrame,
+    bit_phase_map: BitPhaseMap,
     rounding_function: Optional[Callable] = None,
 ) -> tuple:
     """
@@ -105,14 +104,17 @@ def convert_phase_array_to_bit_array(
 
     Args:
         phase_array(Iterable): Iterable of phases to map to bitstrings.
-        phase_bit_dataframe(pd.DataFrame): Dataframe containing the phase-bit mapping.
+        bit_phase_map(BitPhaseMap): Dataframe containing the phase-bits mapping.
         rounding_function(Callable): Rounding function to apply to the target phase.
 
     Returns:
         bit_array(tuple): Tuple of bitstrings corresponding to the phases.
     """
+    # TODO interim pydantic-dataframe migration
+    bit_phase_map = bit_phase_map.dataframe
+
     # Determine the maximum length of the bitstrings in the dataframe
-    max_bit_length = phase_bit_dataframe["bits"].apply(len).max()
+    max_bit_length = bit_phase_map["bits"].apply(len).max()
 
     bit_array = []
 
@@ -122,17 +124,13 @@ def convert_phase_array_to_bit_array(
             phase = rounding_function(phase)
 
         # Check if phase is in the dataframe
-        matched_rows = phase_bit_dataframe.loc[
-            phase_bit_dataframe["phase"] == phase, "bits"
+        matched_rows = bit_phase_map.loc[
+            bit_phase_map["phase"] == phase, "bits"
         ]
 
         # If exact phase is not found, use the nearest phase bit representation
         if matched_rows.empty:
-            bitstring, _ = find_nearest_bit_for_phase(
-                phase,
-                phase_bit_dataframe,
-                rounding_function,
-            )
+            bitstring, _ = find_nearest_bit_for_phase(phase, bit_phase_map, rounding_function)
         else:
             bitstring = matched_rows.iloc[0]
 
@@ -146,7 +144,7 @@ def convert_phase_array_to_bit_array(
 
 def find_nearest_bit_for_phase(
     target_phase: float,
-    phase_bit_dataframe: PhaseBitDataFrame,
+    bit_phase_map: BitPhaseMap,
     rounding_function: Optional[Callable] = None,
 ) -> tuple:
     """
@@ -156,25 +154,28 @@ def find_nearest_bit_for_phase(
 
     Args:
         target_phase(float): Target phase to map to.
-        phase_bit_dataframe(pd.DataFrame): Dataframe containing the phase-bits mapping.
+        bit_phase_map(pd.DataFrame): Dataframe containing the phase-bits mapping.
         rounding_function(Callable): Rounding function to apply to the target phase.
 
     Returns:
         bitstring(str): Bitstring corresponding to the nearest phase.
     """
+    # TODO interim pydantic-dataframe migration
+    bit_phase_map = bit_phase_map.dataframe
+
     # Apply rounding function if provided
     if rounding_function:
         target_phase = rounding_function(target_phase)
 
     # Find the nearest phase from the dataframe
-    phases = phase_bit_dataframe["phase"].values
+    phases = bit_phase_map["phase"].values
     nearest_phase = phases[
         np.argmin(np.abs(phases - target_phase))
     ]  # TODO implement rounding function here.
 
     # Get the corresponding bitstring for the nearest phase
-    bitstring = phase_bit_dataframe.loc[
-        phase_bit_dataframe["phase"] == nearest_phase, "bits"
+    bitstring = bit_phase_map.loc[
+        bit_phase_map["phase"] == nearest_phase, "bits"
     ].iloc[0]
 
     return bitstring, nearest_phase
@@ -182,7 +183,7 @@ def find_nearest_bit_for_phase(
 
 def return_phase_array_from_data_series(
     data_series: pd.Series,
-    phase_map: PhaseMapType,
+    phase_map: BitPhaseMap,
 ) -> list:
     """
     Returns a list of phases from a given data series and phase map.

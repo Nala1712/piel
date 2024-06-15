@@ -1,15 +1,14 @@
 import pandas as pd
 
 from .core import NumericalTypes, PielBaseModel
+from .digital import BitType
 
 
-class PhaseBitDataFrame(PielBaseModel):
-    bits: list[str]
+class BitPhaseMap(PielBaseModel):
+
+    bits: list[BitType]
     phase: list[NumericalTypes]
 
     @property
     def dataframe(self):
-        return pd.DataFrame(self.dict)
-
-
-PhaseMapType = PhaseBitDataFrame
+        return pd.DataFrame(self.dict())
