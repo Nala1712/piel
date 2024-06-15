@@ -3,14 +3,16 @@ import pandas as pd
 from typing import Iterable, Optional, Callable
 from ..types import (
     PhaseMapType,
+    PhaseBitDataFrame,
     LogicSignalsList,
     TruthTableDictionary,
+    TruthTableDataFrame,
     convert_tuple_to_string,
 )
 
 
 def convert_dataframe_to_bit_tuple(
-    dataframe: pd.DataFrame,
+    truth_table_dataframe: TruthTableDataFrame,
     phase_column_name: str,
     phase_bit_dataframe: pd.DataFrame,
     phase_series_name: str = "phase",

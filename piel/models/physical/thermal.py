@@ -1,5 +1,5 @@
 import numpy as np
-from piel.types.models.physical import TemperatureRangeTypes
+from piel.types.physical import TemperatureRangeTypes
 from piel.types import ArrayTypes
 
 __all__ = [

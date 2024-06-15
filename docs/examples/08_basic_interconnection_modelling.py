@@ -18,7 +18,7 @@ from piel.models.physical.electrical.cable import (
     calculate_coaxial_cable_heat_transfer,
     calculate_dc_cable_geometry,
 )
-from piel.types.models.electrical import (
+from piel.types.electrical import (
     CoaxialCableMaterialSpecificationType,
 )
 

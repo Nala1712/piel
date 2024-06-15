@@ -3,7 +3,7 @@ import pandas as pd
 import piel
 from ...types import ArrayTypes
 from .types import MaterialReferencesTypes, MaterialReferenceType
-from piel.types.models.physical import TemperatureRangeTypes
+from piel.types.physical import TemperatureRangeTypes
 
 # CURRENT TODO: finish migrating this, add material sub names, add proper export, put into __init__
 

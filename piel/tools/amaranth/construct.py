@@ -1,6 +1,6 @@
 import amaranth as am
 from typing import Literal
-from piel.types.flows.digital import TruthTableDictionary, LogicSignalsList
+from piel.types.digital import TruthTableDictionary, LogicSignalsList
 
 __all__ = ["construct_amaranth_module_from_truth_table"]
 

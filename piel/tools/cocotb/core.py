@@ -14,7 +14,7 @@ import functools
 import pathlib
 import subprocess
 from piel.file_system import return_path, write_file, delete_path_list_in_directory
-from piel.types.flows.digital import HDLSimulator, HDLTopLevelLanguage
+from piel.types.digital import HDLSimulator, HDLTopLevelLanguage
 
 __all__ = [
     "check_cocotb_testbench_exists",

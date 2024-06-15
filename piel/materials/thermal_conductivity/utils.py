@@ -1,6 +1,6 @@
 import numpy as np
 from piel.types import ArrayTypes
-from piel.types.models.physical import TemperatureRangeTypes
+from piel.types.physical import TemperatureRangeTypes
 from piel.materials.thermal_conductivity.types import MaterialReferenceType
 from piel.materials import thermal_conductivity
 

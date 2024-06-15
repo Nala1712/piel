@@ -6,7 +6,7 @@ from typing import Literal
 from ...project_structure import get_module_folder_type_location
 from ...file_system import return_path
 from ...types import PathTypes
-from piel.types.flows.digital import LogicSignalsList, TruthTableDictionary
+from piel.types.digital import LogicSignalsList, TruthTableDictionary
 
 __all__ = ["verify_truth_table"]
 

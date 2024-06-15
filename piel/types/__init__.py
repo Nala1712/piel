@@ -7,14 +7,16 @@ from .core import (
     QuantityType,
     TupleIntType,
 )
-from piel.types.flows.digital import (
+from .digital import (
+    TruthTableDataFrame,
     TruthTableDictionary,
     LogicSignalsList,
     HDLSimulator,
     HDLTopLevelLanguage,
 )
-from piel.types.flows.photonic import PortsTuple, SParameterMatrixTuple
-from .models.electrical import (
+from .digital_electro_optic import PhaseBitDataFrame, PhaseMapType
+
+from .electrical import (
     CoaxialCableGeometryType,
     CoaxialCableHeatTransferType,
     CoaxialCableMaterialSpecificationType,
@@ -22,15 +24,16 @@ from .models.electrical import (
     DCCableHeatTransferType,
     DCCableMaterialSpecificationType,
 )
-from .models.electro_optic import FockStatePhaseTransitionType, PhaseMapType
-from .models.electronic import BitFormatType, HVAMetricsType, LNAMetricsType
-from .models.photonic import (
+from .electro_optic import FockStatePhaseTransitionType, PhaseTransitionTypes
+from .electronic import BitFormatType, HVAMetricsType, LNAMetricsType
+from .photonic import (
     PhotonicCircuitComponent,
+    PortsTuple,
     OpticalTransmissionCircuit,
     RecursiveNetlist,
+    SParameterMatrixTuple,
 )
 
-from .flows.electro_optic import PhaseTransitionTypes
 
 # Always last
 from .type_conversion import (

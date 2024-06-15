@@ -1,4 +1,4 @@
-from piel.types.flows.digital import TruthTableDictionary
+from piel.types.digital import TruthTableDictionary
 from ..file_system import return_path
 from ..types import PathTypes
 

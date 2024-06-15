@@ -1,4 +1,4 @@
-from ..core import ArrayTypes
+from piel.types.core import ArrayTypes
 
 __all__ = [
     "TemperatureRangeLimitType",

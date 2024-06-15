@@ -1,5 +1,6 @@
+from typing import Literal
 import pandas as pd
-from ..core import TupleIntType
+from .core import TupleIntType
 
 FockStatePhaseTransitionType = {
     "phase": TupleIntType,
@@ -16,4 +17,5 @@ output_state_0 = {
 }
 """
 
-PhaseMapType = pd.DataFrame | pd.Series | dict
+
+PhaseTransitionTypes = Literal["cross", "bar"]
