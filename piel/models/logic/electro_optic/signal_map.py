@@ -64,6 +64,5 @@ def linear_bit_phase_map(
         "phase": linear_phase_array,
     }
     # TODO eventually migrate this to pure dict operations
-    bit_phase_mapping = pd.DataFrame(bit_phase_mapping_raw)
-    bit_phase_mapping = PhaseBitDataFrame(bit_phase_mapping)
+    bit_phase_mapping = PhaseBitDataFrame(bit_phase_mapping_raw)
     return bit_phase_mapping

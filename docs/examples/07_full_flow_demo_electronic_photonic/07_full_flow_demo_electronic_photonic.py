@@ -143,20 +143,6 @@ basic_ideal_phase_map = piel.models.logic.electro_optic.linear_bit_phase_map(
 )
 basic_ideal_phase_map
 
-# +
-from typing_extensions import TypedDict
-
-from pydantic import TypeAdapter, ValidationError
-
-
-class User(TypedDict):
-    name: str
-    id: int
-
-
-User()
-# -
-
 piel.flows.digital_electro_optic.convert_dataframe_to_bit_tuple(
     dataframe=target_implementation_optical_logic_table,
     phase_column_name="phase",

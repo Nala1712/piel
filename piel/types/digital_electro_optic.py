@@ -1,42 +1,29 @@
-from pydantic import field_validator
+from pydantic import (
+    ValidationError,
+    ValidationInfo,
+    ValidatorFunctionWrapHandler,
+)
+from pydantic.functional_validators import WrapValidator
 import pandas as pd
-from .core import PielBaseModel
+from typing import Any
+from typing_extensions import Annotated
 
 
-class PhaseBitDataFrameModel(PielBaseModel):
+def validate_phase_bit_dataframe(
+    v: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
+) -> Any:
     """
-    A Pydantic model to validate that a DataFrame contains the required columns: 'bit' and 'phase'.
+    Validate that the DataFrame contains 'bit' and 'phase' columns.
     """
-
-    dataframe: pd.DataFrame
-
-    @field_validator("dataframe")
-    def validate_dataframe(cls, dataframe: pd.DataFrame):
-        """
-        Validate that the DataFrame contains 'bit' and 'phase' columns.
-        """
-        required_columns = {"bits", "phase"}
-        if not required_columns.issubset(dataframe.columns):
-            missing_columns = required_columns - set(dataframe.columns)
-            raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
-
-        return dataframe
-
-    class Config:
-        arbitrary_types_allowed = True
+    required_columns = {"bits", "phase"}
+    assert not required_columns.issubset(v.columns)
+    try:
+        return handler(v)
+    except ValidationError:
+        missing_columns = required_columns - set(v.columns)
+        print(f"Missing required columns: {', '.join(missing_columns)}")
+        return handler(v.strip())
 
 
-class PhaseBitDataFrame(pd.DataFrame):
-    """
-    A custom DataFrame class that ensures the DataFrame has 'bit' and 'phase' columns.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Validate using the pydantic model
-        PhaseBitDataFrameModel(dataframe=self)
-        # No need to reassign self; validation is already performed alization
-        self.validate_columns(self)
-
-
+PhaseBitDataFrame = Annotated[pd.DataFrame, WrapValidator(validate_phase_bit_dataframe)]
 PhaseMapType = PhaseBitDataFrame
